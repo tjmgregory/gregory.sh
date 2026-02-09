@@ -1,42 +1,34 @@
-# sv
+# gregory.sh
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Personal website and blog. Building in public.
 
-## Creating a project
+## Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- [SvelteKit](https://svelte.dev/) + [mdsvex](https://mdsvex.pngwn.io/) for markdown
+- [Cloudflare Pages](https://pages.cloudflare.com/) for hosting
+- Self-hosted email capture via Cloudflare Workers + KV
 
-```sh
-# create a new project
-npx sv create my-app
-```
+## Development
 
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv create --template minimal --types ts --no-install .
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
+```bash
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## Writing
 
-To create a production version of your app:
+Add posts to `content/posts/`:
 
-```sh
-npm run build
+```md
+---
+title: My Post
+date: 2026-02-09
+description: A brief description
+---
+
+Your content here...
 ```
 
-You can preview the production build with `npm run preview`.
+## License
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+MIT

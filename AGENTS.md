@@ -2,11 +2,33 @@
 
 Personal website and blog for building in public.
 
+## Current Status
+
+**Phase:** Inception → ready for Construction
+**Last session:** 2026-02-09
+**State:** Scaffolded, not yet runnable
+
+### What's Done
+- SvelteKit + mdsvex + Cloudflare adapter configured
+- UP vision document written (`docs/unified-process/inception/vision.md`)
+- Beads initialized with MVP epic and tasks
+- Project structure defined
+
+### What's NOT Done
+- Dependencies not installed (`npm install` needed)
+- No GitHub repo yet (need to create and push)
+- No actual code written yet—just scaffold
+
+### Next Steps
+1. `npm install` to get dependencies
+2. Create GitHub repo: `gh repo create tjmgregory/gregory.sh --public --source=. --push`
+3. Start with `gregory.sh-85j.1` (Set up blog post loading) — this unblocks most other tasks
+
 ## Stack
 
 - **SvelteKit 5** + **mdsvex** for markdown blog posts
 - **Cloudflare Pages** for hosting (static)
-- **Cloudflare Workers + KV** for email capture
+- **Cloudflare Workers + KV** for email capture (self-hosted, no external deps)
 - **TypeScript** throughout
 
 ## Project Structure
@@ -46,21 +68,41 @@ Content here...
 ## Commands
 
 ```bash
+npm install      # Install dependencies (DO THIS FIRST)
 npm run dev      # Development server
 npm run build    # Build for production
 npm run preview  # Preview production build
 npm run check    # Type checking
 ```
 
-## Unified Process
-
-This project follows `/unified-process`. See `docs/unified-process/` for artefacts.
-
-Current phase: **Inception**
-
 ## Issue Tracking
 
-Uses beads. Run `bd list` to see open issues.
+Uses beads. Key commands:
+
+```bash
+bd list          # See all issues
+bd ready         # See unblocked work
+bd show <id>     # Issue details
+bd update <id> --status in_progress  # Claim work
+bd close <id>    # Mark done
+```
+
+**MVP Epic:** `gregory.sh-85j`
+- 8 tasks, dependencies set up
+- Start with `gregory.sh-85j.1` (blog post loading)
+
+## Unified Process
+
+Follows `/unified-process`. See `docs/unified-process/inception/vision.md` for goals.
+
+Current phase: **Inception** (ready to move to Construction)
+
+## Design Decisions
+
+- **Markdown in repo** over CMS — zero external deps, git-backed, fast
+- **Self-hosted email capture** over Buttondown — learning opportunity, full control
+- **Static generation** over SSR — fastest possible, SEO-first
+- **Minimal MVP** — ship fast, iterate in public
 
 ## Landing the Plane (Session Completion)
 

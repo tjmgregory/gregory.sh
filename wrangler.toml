@@ -1,0 +1,7 @@
+name = "gregory-sh"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "SUBSCRIBERS"
+id = "placeholder-create-in-cloudflare-dashboard"
+preview_id = "placeholder-for-local-dev"

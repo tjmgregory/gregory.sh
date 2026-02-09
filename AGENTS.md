@@ -2,24 +2,6 @@
 
 Personal website and blog for building in public.
 
-## Current Status
-
-**Phase:** Inception → ready for Construction
-**Last session:** 2026-02-09
-**State:** Scaffolded, not yet runnable
-
-### What's Done
-- SvelteKit + mdsvex + Cloudflare adapter configured
-- UP vision document written (`docs/unified-process/inception/vision.md`)
-- Beads initialized with MVP epic and tasks
-- Project structure defined
-
-### What's NOT Done
-- No actual code written yet—just scaffold
-
-### Next Steps
-1. Start with `gregory.sh-85j.1` (Set up blog post loading) — this unblocks most other tasks
-
 ## Stack
 
 - **SvelteKit 5** + **mdsvex** for markdown blog posts
@@ -73,19 +55,15 @@ bun run check    # Type checking
 
 ## Issue Tracking
 
-Uses beads. Key commands:
+**Use beads to find work.** Run `bd ready` to see unblocked tasks.
 
 ```bash
-bd list          # See all issues
-bd ready         # See unblocked work
-bd show <id>     # Issue details
-bd update <id> --status in_progress  # Claim work
-bd close <id>    # Mark done
+bd ready                              # Find work with no blockers
+bd list                               # See all issues
+bd show <id>                          # Issue details
+bd update <id> --status in_progress   # Claim work
+bd close <id>                         # Mark done
 ```
-
-**MVP Epic:** `gregory.sh-85j`
-- 8 tasks, dependencies set up
-- Start with `gregory.sh-85j.1` (blog post loading)
 
 ## Unified Process
 

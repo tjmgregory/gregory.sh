@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { NavSubscribe } from '$lib';
 
 	let { children } = $props();
 </script>
@@ -10,6 +11,7 @@
 		<nav class="site-nav">
 			<a href="/">home</a>
 			<a href="/blog">blog</a>
+			<NavSubscribe />
 		</nav>
 	</header>
 

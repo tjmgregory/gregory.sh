@@ -1,12 +1,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { Seo } from '$lib';
 
 	let { data }: { data: PageData } = $props();
 </script>
 
-<svelte:head>
-	<title>Blog | gregory.sh</title>
-</svelte:head>
+<Seo
+	title="Blog"
+	description="Articles on building in public, software engineering, and making things."
+	url="https://gregory.sh/blog"
+/>
 
 <h1>Archives</h1>
 

@@ -4,11 +4,6 @@
 	let { children } = $props();
 </script>
 
-<svelte:head>
-	<title>gregory.sh</title>
-	<meta name="description" content="Building in public" />
-</svelte:head>
-
 <div class="container">
 	<header class="site-header">
 		<h1 class="site-title">gregory.sh</h1>

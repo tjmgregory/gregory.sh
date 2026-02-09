@@ -1,0 +1,68 @@
+name: PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+      - name: Deploy preview to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy .svelte-kit/cloudflare --project-name=gregory-sh --branch=${{ github.head_ref }} --commit-dirty=true
+
+      - name: Extract deployment URL
+        id: url
+        run: |
+          # The wrangler output contains the deployment URL
+          # Format: https://<hash>.gregory-sh.pages.dev or https://<branch>.gregory-sh.pages.dev
+          echo "url=${{ steps.deploy.outputs.deployment-url }}" >> $GITHUB_OUTPUT
+
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- cf-pages-preview -->'
+
+      - name: Post or update preview comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            <!-- cf-pages-preview -->
+            ## Preview Deployment
+
+            | Status | URL |
+            |--------|-----|
+            | Ready | ${{ steps.deploy.outputs.deployment-url }} |
+
+            **Branch:** `${{ github.head_ref }}`
+            **Commit:** `${{ github.sha }}`
+
+            ---
+            <sub>This preview will be updated on each push to this PR.</sub>

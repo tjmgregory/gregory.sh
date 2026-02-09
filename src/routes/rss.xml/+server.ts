@@ -1,4 +1,5 @@
 import { getPosts } from '$lib/posts';
+import { trackRssSubscriber } from '$lib/rss-stats';
 import type { RequestHandler } from './$types';
 
 const SITE_URL = 'https://gregory.sh';
@@ -14,8 +15,16 @@ function escapeXml(text: string): string {
 		.replace(/'/g, '&apos;');
 }
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ request, platform }) => {
 	const posts = getPosts();
+
+	// Track subscriber (fire-and-forget)
+	const userAgent = request.headers.get('user-agent');
+	if (userAgent && platform?.env?.RSS_STATS) {
+		trackRssSubscriber(platform.env.RSS_STATS, userAgent).catch((err) =>
+			console.error('RSS tracking error:', err)
+		);
+	}
 
 	const items = posts
 		.map((post) => {
@@ -50,5 +59,3 @@ export const GET: RequestHandler = async () => {
 		}
 	});
 };
-
-export const prerender = true;

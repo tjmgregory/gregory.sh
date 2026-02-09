@@ -4,6 +4,7 @@ declare global {
 		interface Platform {
 			env: {
 				SUBSCRIBERS: KVNamespace;
+				RSS_STATS: KVNamespace;
 			};
 		}
 	}

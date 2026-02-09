@@ -3,5 +3,10 @@ compatibility_date = "2024-01-01"
 
 [[kv_namespaces]]
 binding = "SUBSCRIBERS"
-id = "placeholder-create-in-cloudflare-dashboard"
-preview_id = "placeholder-for-local-dev"
+id = "3a7acd46675b43909b1e8156093d44a7"
+preview_id = "553e357c52cf4d55867a5878d57f312e"
+
+[[kv_namespaces]]
+binding = "RSS_STATS"
+id = "84bc853c97ba476e836d88f7fdebfb4c"
+preview_id = "b5e8ae3e864349b989cf6b3df495a043"

@@ -1,8 +1,9 @@
 name: PR Preview
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  push:
+    branches-ignore:
+      - main
 
 jobs:
   preview:
@@ -13,8 +14,6 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -32,28 +31,31 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .svelte-kit/cloudflare --project-name=gregory-sh --branch=${{ github.event.pull_request.head.ref }} --commit-dirty=true
+          command: pages deploy .svelte-kit/cloudflare --project-name=gregory-sh --branch=${{ github.ref_name }} --commit-dirty=true
 
-      - name: Extract deployment URL
-        id: url
+      - name: Find PR for this branch
+        id: find-pr
         run: |
-          # The wrangler output contains the deployment URL
-          # Format: https://<hash>.gregory-sh.pages.dev or https://<branch>.gregory-sh.pages.dev
-          echo "url=${{ steps.deploy.outputs.deployment-url }}" >> $GITHUB_OUTPUT
+          PR_NUMBER=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number // empty')
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Find existing comment
+        if: steps.find-pr.outputs.pr_number
         uses: peter-evans/find-comment@v3
         id: find-comment
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ steps.find-pr.outputs.pr_number }}
           comment-author: 'github-actions[bot]'
           body-includes: '<!-- cf-pages-preview -->'
 
       - name: Post or update preview comment
+        if: steps.find-pr.outputs.pr_number
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ steps.find-pr.outputs.pr_number }}
           edit-mode: replace
           body: |
             <!-- cf-pages-preview -->
@@ -63,8 +65,8 @@ jobs:
             |--------|-----|
             | Ready | ${{ steps.deploy.outputs.deployment-url }} |
 
-            **Branch:** `${{ github.event.pull_request.head.ref }}`
-            **Commit:** `${{ github.event.pull_request.head.sha }}`
+            **Branch:** `${{ github.ref_name }}`
+            **Commit:** `${{ github.sha }}`
 
             ---
-            <sub>This preview will be updated on each push to this PR.</sub>
+            <sub>This preview will be updated on each push to this branch.</sub>

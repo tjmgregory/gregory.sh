@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { SubscribeForm } from '$lib';
 
 	let { data }: { data: PageData } = $props();
 </script>
@@ -23,3 +24,9 @@
 		{/each}
 	</ul>
 {/if}
+
+<section>
+	<h2>Subscribe</h2>
+	<p>Get notified when I publish new posts.</p>
+	<SubscribeForm />
+</section>

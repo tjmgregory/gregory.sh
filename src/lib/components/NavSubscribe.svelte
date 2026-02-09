@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { fade, fly } from 'svelte/transition';
-
 	type State = 'idle' | 'expanded' | 'input' | 'loading' | 'success' | 'error';
 
 	let state: State = $state('idle');
@@ -22,7 +20,7 @@
 				if (state === 'expanded') {
 					state = 'idle';
 				}
-			}, 200);
+			}, 300);
 		}
 	}
 
@@ -65,7 +63,7 @@
 
 			if (!res.ok) {
 				state = 'error';
-				message = data.error || 'failed';
+				message = data.error || 'error';
 				setTimeout(() => {
 					state = 'input';
 					message = '';
@@ -82,7 +80,7 @@
 			}, 2000);
 		} catch {
 			state = 'error';
-			message = 'failed';
+			message = 'error';
 			setTimeout(() => {
 				state = 'input';
 				message = '';
@@ -103,63 +101,83 @@
 	role="group"
 	aria-label="Subscribe options"
 >
-	{#if state === 'idle'}
-		<span class="label" in:fade={{ duration: 150 }} out:fade={{ duration: 100 }}>subscribe</span>
-	{:else if state === 'expanded'}
-		<div class="options" in:fly={{ x: -8, duration: 150 }} out:fade={{ duration: 100 }}>
-			<button class="option" onclick={showEmailInput} type="button">email</button>
-			<span class="sep">/</span>
-			<a href="/rss.xml" class="option">rss</a>
-		</div>
-	{:else if state === 'input' || state === 'loading'}
-		<form
-			class="input-form"
-			in:fly={{ x: -8, duration: 150 }}
-			out:fade={{ duration: 100 }}
-			onsubmit={handleSubmit}
-		>
-			<input
-				bind:this={inputRef}
-				type="email"
-				bind:value={email}
-				placeholder="your@email"
-				required
-				disabled={state === 'loading'}
-				onblur={handleInputBlur}
-				onkeydown={handleKeydown}
-			/>
-			<button type="submit" disabled={state === 'loading'} aria-label="Submit">
-				{state === 'loading' ? '...' : '>'}
-			</button>
-			<button type="button" class="close" onclick={reset} aria-label="Cancel">x</button>
-		</form>
-	{:else if state === 'success' || state === 'error'}
-		<span class="msg" class:error={state === 'error'} in:fade={{ duration: 150 }} out:fade={{ duration: 100 }}>
-			{message}
-		</span>
-	{/if}
+	<!-- All states stack in same position, animate with wipe -->
+	<div class="state-container">
+		{#if state === 'idle'}
+			<span class="content wipe-in">subscribe</span>
+		{:else if state === 'expanded'}
+			<div class="content options wipe-in">
+				<button class="option" onclick={showEmailInput} type="button">email</button>
+				<span class="sep">/</span>
+				<a href="/rss.xml" class="option">rss</a>
+			</div>
+		{:else if state === 'input' || state === 'loading'}
+			<form class="content input-form wipe-in" onsubmit={handleSubmit}>
+				<input
+					bind:this={inputRef}
+					type="email"
+					bind:value={email}
+					placeholder="your@email"
+					required
+					disabled={state === 'loading'}
+					onblur={handleInputBlur}
+					onkeydown={handleKeydown}
+				/>
+				<button type="submit" disabled={state === 'loading'} aria-label="Submit">
+					{state === 'loading' ? '..' : '>'}
+				</button>
+				<button type="button" class="close" onclick={reset} aria-label="Cancel">x</button>
+			</form>
+		{:else if state === 'success' || state === 'error'}
+			<span class="content msg wipe-in" class:error={state === 'error'}>{message}</span>
+		{/if}
+	</div>
 </div>
 
 <style>
 	.nav-subscribe {
 		position: relative;
-		display: inline-flex;
-		align-items: center;
-		height: 1.5rem;
-		min-width: 5.5rem;
 	}
 
-	.label {
+	.state-container {
+		display: flex;
+		justify-content: flex-end;
+		min-width: 10rem;
+	}
+
+	.content {
+		white-space: nowrap;
+	}
+
+	/* Wipe-in animation using clip-path */
+	.wipe-in {
+		animation: wipeIn 0.25s ease-out forwards;
+	}
+
+	@keyframes wipeIn {
+		from {
+			clip-path: inset(0 100% 0 0);
+			opacity: 0.5;
+		}
+		to {
+			clip-path: inset(0 0 0 0);
+			opacity: 1;
+		}
+	}
+
+	/* Idle state */
+	.state-container > span:not(.msg) {
 		color: var(--matrix-green-dim);
 		cursor: default;
 		transition: color 0.15s ease, text-shadow 0.15s ease;
 	}
 
-	.nav-subscribe:hover .label {
+	.nav-subscribe:hover .state-container > span:not(.msg) {
 		color: var(--matrix-green);
 		text-shadow: 0 0 10px var(--matrix-green-glow);
 	}
 
+	/* Options */
 	.options {
 		display: flex;
 		align-items: center;
@@ -191,6 +209,7 @@
 		color: var(--matrix-green-dim);
 	}
 
+	/* Input form */
 	.input-form {
 		display: flex;
 		align-items: center;
@@ -248,6 +267,7 @@
 		color: var(--matrix-green);
 	}
 
+	/* Messages */
 	.msg {
 		color: var(--matrix-green);
 	}

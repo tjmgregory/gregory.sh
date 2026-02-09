@@ -150,10 +150,17 @@ li::marker {
 
 .site-nav {
 	margin-top: 1rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.nav-links {
+	display: flex;
+	gap: 1.5rem;
 }
 
 .site-nav a {
-	margin-right: 1.5rem;
 	border-bottom: none;
 }
 

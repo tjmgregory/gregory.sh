@@ -5,3 +5,8 @@ compatibility_date = "2024-01-01"
 binding = "SUBSCRIBERS"
 id = "placeholder-create-in-cloudflare-dashboard"
 preview_id = "placeholder-for-local-dev"
+
+[[kv_namespaces]]
+binding = "RSS_STATS"
+id = "placeholder-create-in-cloudflare-dashboard"
+preview_id = "placeholder-for-local-dev"

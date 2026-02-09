@@ -4,6 +4,7 @@
     "": {
       "name": "gregory.sh",
       "devDependencies": {
+        "@cloudflare/workers-types": "^4.20260207.0",
         "@sveltejs/adapter-cloudflare": "^7.2.6",
         "@sveltejs/kit": "^2.50.2",
         "@sveltejs/vite-plugin-svelte": "^6.2.4",

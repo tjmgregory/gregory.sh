@@ -31,15 +31,19 @@ Your content here...
 
 ## Deployment
 
-Deployed automatically to Cloudflare Pages on push to `main`.
+Deployed automatically to Cloudflare Pages on push to `main`. The workflow auto-creates the Pages project on first deploy.
 
 ### Setup (one-time)
 
-1. Create a Cloudflare Pages project named `gregory-sh`
-2. Add GitHub secrets:
-   - `CLOUDFLARE_API_TOKEN` - API token with Pages edit permissions
-   - `CLOUDFLARE_ACCOUNT_ID` - Your Cloudflare account ID
-3. (Optional) For email capture: Create a KV namespace and update `wrangler.toml`
+Create a GitHub environment called `prod` with:
+
+| Type | Name | Value |
+|------|------|-------|
+| Secret | `CLOUDFLARE_API_TOKEN` | API token (see below) |
+| Variable | `CLOUDFLARE_ACCOUNT_ID` | Your account ID (from URL) |
+
+**API Token permissions** (create at dash.cloudflare.com/profile/api-tokens):
+- Account → Cloudflare Pages → Edit
 
 ### Custom domain
 

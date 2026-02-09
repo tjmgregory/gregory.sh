@@ -1,39 +1,39 @@
 <script lang="ts">
-	type State = 'idle' | 'expanded' | 'input' | 'loading' | 'success' | 'error';
+	type Status = 'idle' | 'expanded' | 'input' | 'loading' | 'success' | 'error';
 
-	let state: State = $state('idle');
+	let status = $state<Status>('idle');
 	let email = $state('');
 	let message = $state('');
 	let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
 	let inputRef: HTMLInputElement | null = null;
 
 	function handleMouseEnter() {
-		if (state === 'idle') {
+		if (status === 'idle') {
 			if (hoverTimeout) clearTimeout(hoverTimeout);
-			state = 'expanded';
+			status = 'expanded';
 		}
 	}
 
 	function handleMouseLeave() {
-		if (state === 'expanded') {
+		if (status === 'expanded') {
 			hoverTimeout = setTimeout(() => {
-				if (state === 'expanded') {
-					state = 'idle';
+				if (status === 'expanded') {
+					status = 'idle';
 				}
 			}, 300);
 		}
 	}
 
 	function showEmailInput() {
-		state = 'input';
+		status = 'input';
 		setTimeout(() => inputRef?.focus(), 50);
 	}
 
 	function handleInputBlur() {
-		if (state === 'input' && !email.trim()) {
+		if (status === 'input' && !email.trim()) {
 			setTimeout(() => {
-				if (state === 'input' && !email.trim()) {
-					state = 'idle';
+				if (status === 'input' && !email.trim()) {
+					status = 'idle';
 				}
 			}, 150);
 		}
@@ -42,7 +42,7 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
 			email = '';
-			state = 'idle';
+			status = 'idle';
 		}
 	}
 
@@ -50,7 +50,7 @@
 		e.preventDefault();
 		if (!email.trim()) return;
 
-		state = 'loading';
+		status = 'loading';
 
 		try {
 			const res = await fetch('/api/subscribe', {
@@ -59,30 +59,30 @@
 				body: JSON.stringify({ email })
 			});
 
-			const data = await res.json();
+			const data = (await res.json()) as { error?: string; message?: string };
 
 			if (!res.ok) {
-				state = 'error';
-				message = data.error || 'error';
+				status = 'error';
+				message = data.error ?? 'error';
 				setTimeout(() => {
-					state = 'input';
+					status = 'input';
 					message = '';
 				}, 2000);
 				return;
 			}
 
-			state = 'success';
+			status = 'success';
 			message = 'subscribed';
 			email = '';
 			setTimeout(() => {
-				state = 'idle';
+				status = 'idle';
 				message = '';
 			}, 2000);
 		} catch {
-			state = 'error';
+			status = 'error';
 			message = 'error';
 			setTimeout(() => {
-				state = 'input';
+				status = 'input';
 				message = '';
 			}, 2000);
 		}
@@ -90,7 +90,7 @@
 
 	function reset() {
 		email = '';
-		state = 'idle';
+		status = 'idle';
 	}
 </script>
 
@@ -103,15 +103,15 @@
 >
 	<!-- All states stack in same position, animate with wipe -->
 	<div class="state-container">
-		{#if state === 'idle'}
+		{#if status === 'idle'}
 			<span class="content wipe-in">subscribe</span>
-		{:else if state === 'expanded'}
+		{:else if status === 'expanded'}
 			<div class="content options wipe-in">
 				<button class="option" onclick={showEmailInput} type="button">email</button>
 				<span class="sep">/</span>
 				<a href="/rss.xml" class="option">rss</a>
 			</div>
-		{:else if state === 'input' || state === 'loading'}
+		{:else if status === 'input' || status === 'loading'}
 			<form class="content input-form wipe-in" onsubmit={handleSubmit}>
 				<input
 					bind:this={inputRef}
@@ -119,17 +119,17 @@
 					bind:value={email}
 					placeholder="your@email"
 					required
-					disabled={state === 'loading'}
+					disabled={status === 'loading'}
 					onblur={handleInputBlur}
 					onkeydown={handleKeydown}
 				/>
-				<button type="submit" disabled={state === 'loading'} aria-label="Submit">
-					{state === 'loading' ? '..' : '>'}
+				<button type="submit" disabled={status === 'loading'} aria-label="Submit">
+					{status === 'loading' ? '..' : '>'}
 				</button>
 				<button type="button" class="close" onclick={reset} aria-label="Cancel">x</button>
 			</form>
-		{:else if state === 'success' || state === 'error'}
-			<span class="content msg wipe-in" class:error={state === 'error'}>{message}</span>
+		{:else if status === 'success' || status === 'error'}
+			<span class="content msg wipe-in" class:error={status === 'error'}>{message}</span>
 		{/if}
 	</div>
 </div>

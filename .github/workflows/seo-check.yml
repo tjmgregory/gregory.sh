@@ -1,0 +1,36 @@
+name: SEO Check
+
+on:
+  pull_request:
+    paths:
+      - 'content/posts/**'
+      - 'static/og/**'
+
+jobs:
+  validate:
+    name: Validate SEO
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Validate SEO requirements
+        run: bun run seo:validate
+
+      - name: Check OG images exist
+        run: |
+          for post in content/posts/*.md; do
+            slug=$(basename "$post" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+            if [ ! -f "static/og/${slug}.png" ]; then
+              echo "⚠ Missing OG image for $slug"
+            fi
+          done

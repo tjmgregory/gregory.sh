@@ -14,16 +14,16 @@
 				body: JSON.stringify({ email })
 			});
 
-			const data = await res.json();
+			const data = (await res.json()) as { error?: string; message?: string };
 
 			if (!res.ok) {
 				status = 'error';
-				message = data.error || 'Something went wrong';
+				message = data.error ?? 'Something went wrong';
 				return;
 			}
 
 			status = 'success';
-			message = data.message;
+			message = data.message ?? 'Subscribed!';
 			email = '';
 		} catch {
 			status = 'error';

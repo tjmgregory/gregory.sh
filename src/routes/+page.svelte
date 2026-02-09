@@ -1,9 +1,11 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { SubscribeForm } from '$lib';
+	import { SubscribeForm, Seo } from '$lib';
 
 	let { data }: { data: PageData } = $props();
 </script>
+
+<Seo url="https://gregory.sh" />
 
 <p>Welcome to the system.<span class="cursor"></span></p>
 

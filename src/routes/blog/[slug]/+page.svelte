@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { error } from '@sveltejs/kit';
 	import { getPost } from '$lib/posts';
+	import { Seo } from '$lib';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -14,10 +15,13 @@
 	});
 </script>
 
-<svelte:head>
-	<title>{post.title} | gregory.sh</title>
-	<meta name="description" content={post.description} />
-</svelte:head>
+<Seo
+	title={post.title}
+	description={post.description}
+	url={`https://gregory.sh/blog/${post.slug}`}
+	type="article"
+	publishedTime={post.date}
+/>
 
 <article>
 	<header class="post-header">

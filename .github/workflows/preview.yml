@@ -1,0 +1,73 @@
+name: PR Preview
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment: preview
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+      - name: Deploy preview to Cloudflare Pages
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy .svelte-kit/cloudflare --project-name=gregory-sh --branch=${{ github.ref_name }} --commit-dirty=true
+
+      - name: Find PR for this branch
+        id: find-pr
+        run: |
+          PR_NUMBER=$(gh pr list --head "${{ github.ref_name }}" --json number --jq '.[0].number // empty')
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Find existing comment
+        if: steps.find-pr.outputs.pr_number
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ steps.find-pr.outputs.pr_number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- cf-pages-preview -->'
+
+      - name: Post or update preview comment
+        if: steps.find-pr.outputs.pr_number
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ steps.find-pr.outputs.pr_number }}
+          edit-mode: replace
+          body: |
+            <!-- cf-pages-preview -->
+            ## Preview Deployment
+
+            | Status | URL |
+            |--------|-----|
+            | Ready | ${{ steps.deploy.outputs.deployment-url }} |
+
+            **Branch:** `${{ github.ref_name }}`
+            **Commit:** `${{ github.sha }}`
+
+            ---
+            <sub>This preview will be updated on each push to this branch.</sub>

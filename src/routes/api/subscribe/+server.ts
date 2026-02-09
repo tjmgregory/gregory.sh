@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { isValidEmail } from '$lib/validation';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
-	const { email } = await request.json();
+	const { email } = (await request.json()) as { email?: string };
 
 	if (!email || !isValidEmail(email)) {
 		return json({ error: 'Invalid email address' }, { status: 400 });

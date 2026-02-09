@@ -51,6 +51,8 @@ bun run dev:port <port>  # Development server (REQUIRED: specify port)
 bun run build            # Build for production
 bun run preview          # Preview production build
 bun run check            # Type checking
+bun run test             # Run tests in watch mode
+bun run test:run         # Run tests once
 ```
 
 ## Dev Server & Port Management

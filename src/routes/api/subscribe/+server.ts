@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { isValidEmail } from '$lib/validation';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const { email } = await request.json();
@@ -26,7 +27,3 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	return json({ message: 'Subscribed successfully' });
 };
-
-function isValidEmail(email: string): boolean {
-	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}

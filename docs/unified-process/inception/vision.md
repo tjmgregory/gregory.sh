@@ -26,6 +26,7 @@ For **Theo Gregory**, who wants to share learnings, projects, and thinking publi
 | G-004.4 | Low-friction publishing | Write markdown, push, done |
 | G-004.5 | Email capture | Collect subscribers for newsletter |
 | G-004.6 | RSS feed | Standard feed for readers who prefer RSS |
+| G-004.7 | Automated SEO | AI-powered SEO generation and optimization at build time |
 
 ## G-005: Features (MVP)
 

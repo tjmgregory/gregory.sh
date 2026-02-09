@@ -13,10 +13,12 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
 		"test:run": "vitest run",
-		"seo:generate": "bun run scripts/generate-seo.ts"
+		"seo:generate": "bun run scripts/generate-seo.ts",
+		"og:generate": "bun run scripts/generate-og-images.ts"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260207.0",
+		"@resvg/resvg-js": "^2.6.2",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
 		"@sveltejs/kit": "^2.50.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",
@@ -27,6 +29,7 @@
 		"jsdom": "^28.0.0",
 		"mdsvex": "^0.12.6",
 		"openai": "^6.18.0",
+		"satori": "^0.19.1",
 		"svelte": "^5.50.0",
 		"svelte-check": "^4.3.6",
 		"typescript": "^5.9.3",

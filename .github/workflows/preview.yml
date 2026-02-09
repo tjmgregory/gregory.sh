@@ -1,7 +1,7 @@
 name: PR Preview
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 jobs:
@@ -13,6 +13,8 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -30,7 +32,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .svelte-kit/cloudflare --project-name=gregory-sh --branch=${{ github.head_ref }} --commit-dirty=true
+          command: pages deploy .svelte-kit/cloudflare --project-name=gregory-sh --branch=${{ github.event.pull_request.head.ref }} --commit-dirty=true
 
       - name: Extract deployment URL
         id: url
@@ -61,8 +63,8 @@ jobs:
             |--------|-----|
             | Ready | ${{ steps.deploy.outputs.deployment-url }} |
 
-            **Branch:** `${{ github.head_ref }}`
-            **Commit:** `${{ github.sha }}`
+            **Branch:** `${{ github.event.pull_request.head.ref }}`
+            **Commit:** `${{ github.event.pull_request.head.sha }}`
 
             ---
             <sub>This preview will be updated on each push to this PR.</sub>

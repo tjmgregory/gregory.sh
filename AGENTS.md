@@ -46,12 +46,54 @@ Content here...
 ## Commands
 
 ```bash
-bun install      # Install dependencies
-bun run dev      # Development server
-bun run build    # Build for production
-bun run preview  # Preview production build
-bun run check    # Type checking
+bun install              # Install dependencies
+bun run dev:port <port>  # Development server (REQUIRED: specify port)
+bun run build            # Build for production
+bun run preview          # Preview production build
+bun run check            # Type checking
 ```
+
+## Dev Server & Port Management
+
+**CRITICAL: Multi-worktree port allocation is mandatory.**
+
+Since this repo uses worktrees, multiple dev servers may run simultaneously. Each worktree MUST use a unique port.
+
+### Port Allocation
+
+| Location | Port |
+|----------|------|
+| Main checkout (read-only) | 5173 (reserved, don't use) |
+| First worktree | 5180 |
+| Second worktree | 5181 |
+| Third worktree | 5182 |
+| ... | 518N |
+
+### Starting the Dev Server
+
+```bash
+# Always specify a port explicitly
+bun run dev:port 5180
+```
+
+The server will fail if the port is in use—choose the next available port.
+
+### Playwright / Browser Automation
+
+When using Playwright MCP or browser automation:
+
+1. **Start the dev server first** and note the port
+2. **Use that port in all browser interactions**
+
+```bash
+# Example: Start dev server
+bun run dev:port 5180 &
+
+# Then navigate Playwright to:
+# http://localhost:5180
+```
+
+**IMPORTANT:** Store the port you're using and reference it for ALL browser_navigate calls. Do not assume port 5173.
 
 ## Issue Tracking
 

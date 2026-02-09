@@ -15,14 +15,10 @@ Personal website and blog for building in public.
 - Project structure defined
 
 ### What's NOT Done
-- Dependencies not installed (`npm install` needed)
-- No GitHub repo yet (need to create and push)
 - No actual code written yet—just scaffold
 
 ### Next Steps
-1. `npm install` to get dependencies
-2. Create GitHub repo: `gh repo create tjmgregory/gregory.sh --public --source=. --push`
-3. Start with `gregory.sh-85j.1` (Set up blog post loading) — this unblocks most other tasks
+1. Start with `gregory.sh-85j.1` (Set up blog post loading) — this unblocks most other tasks
 
 ## Stack
 
@@ -68,11 +64,11 @@ Content here...
 ## Commands
 
 ```bash
-npm install      # Install dependencies (DO THIS FIRST)
-npm run dev      # Development server
-npm run build    # Build for production
-npm run preview  # Preview production build
-npm run check    # Type checking
+bun install      # Install dependencies
+bun run dev      # Development server
+bun run build    # Build for production
+bun run preview  # Preview production build
+bun run check    # Type checking
 ```
 
 ## Issue Tracking

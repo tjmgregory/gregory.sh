@@ -1,16 +1,17 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { SubscribeForm } from '$lib';
 
 	let { data }: { data: PageData } = $props();
 </script>
 
-<p>Welcome to the system.<span class="cursor"></span></p>
+<svelte:head>
+	<title>Blog | gregory.sh</title>
+</svelte:head>
 
-<h2>Latest transmissions</h2>
+<h1>Archives</h1>
 
 {#if data.posts.length === 0}
-	<p>No posts yet. The Matrix is silent.</p>
+	<p>No transmissions found.</p>
 {:else}
 	<ul class="post-list">
 		{#each data.posts as post}
@@ -24,9 +25,3 @@
 		{/each}
 	</ul>
 {/if}
-
-<section>
-	<h2>Subscribe</h2>
-	<p>Get notified when I publish new posts.</p>
-	<SubscribeForm />
-</section>

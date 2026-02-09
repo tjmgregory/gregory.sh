@@ -1,2 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import { SubscribeForm } from '$lib';
+</script>
+
+<h1>gregory.sh</h1>
+
+<section>
+	<h2>Subscribe</h2>
+	<p>Get notified when I publish new posts.</p>
+	<SubscribeForm />
+</section>

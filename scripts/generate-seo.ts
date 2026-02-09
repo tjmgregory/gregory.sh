@@ -1,8 +1,11 @@
 /**
- * SEO Generation Script (Spike)
+ * SEO Generation Script
  *
  * Generates meta descriptions for posts missing them.
- * Run: bun run seo:generate
+ *
+ * Usage:
+ *   bun run seo:generate           # Generate and write
+ *   bun run seo:generate --dry-run # Preview without writing
  *
  * Requires: OPENAI_API_KEY environment variable
  */
@@ -18,6 +21,16 @@ interface PostFrontmatter {
 	title: string;
 	date: string;
 	description?: string;
+}
+
+interface Args {
+	dryRun: boolean;
+}
+
+function parseArgs(): Args {
+	return {
+		dryRun: process.argv.includes('--dry-run')
+	};
 }
 
 async function generateDescription(
@@ -53,6 +66,12 @@ Return ONLY the meta description, no quotes or explanation.`
 }
 
 async function main() {
+	const args = parseArgs();
+
+	if (args.dryRun) {
+		console.log('DRY RUN - no files will be modified\n');
+	}
+
 	const apiKey = process.env.OPENAI_API_KEY;
 	if (!apiKey) {
 		console.error('Error: OPENAI_API_KEY environment variable required');
@@ -61,13 +80,12 @@ async function main() {
 
 	const openai = new OpenAI({ apiKey });
 
-	// Check if posts directory exists
 	if (!fs.existsSync(POSTS_DIR)) {
 		console.log(`No posts directory at ${POSTS_DIR}`);
 		return;
 	}
 
-	const files = fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith('.md'));
+	const files = fs.readdirSync(POSTS_DIR).filter((f: string) => f.endsWith('.md'));
 	console.log(`Found ${files.length} post(s)\n`);
 
 	let generated = 0;
@@ -79,7 +97,6 @@ async function main() {
 		const { data, content } = matter(raw);
 		const frontmatter = data as PostFrontmatter;
 
-		// Skip if description exists and is non-empty
 		if (frontmatter.description?.trim()) {
 			console.log(`✓ ${file} — has description, skipping`);
 			skipped++;
@@ -97,12 +114,15 @@ async function main() {
 
 		console.log(`  "${description}" (${description.length} chars)`);
 
-		// Update frontmatter
-		frontmatter.description = description;
-		const updated = matter.stringify(content, frontmatter);
-		fs.writeFileSync(filepath, updated);
+		if (!args.dryRun) {
+			frontmatter.description = description;
+			const updated = matter.stringify(content, frontmatter);
+			fs.writeFileSync(filepath, updated);
+			console.log(`  ✓ Written to ${file}`);
+		} else {
+			console.log(`  ⊘ Dry run, not written`);
+		}
 
-		console.log(`  ✓ Written to ${file}`);
 		generated++;
 	}
 

@@ -6,11 +6,23 @@
 		image?: string;
 		type?: 'website' | 'article';
 		publishedTime?: string;
+		modifiedTime?: string;
 	}
 
 	const site = 'https://gregory.sh';
 	const siteName = 'gregory.sh';
 	const defaultDescription = 'Building in public - thoughts on software, startups, and making things.';
+
+	const author = {
+		name: 'Theo Gregory',
+		url: site
+	};
+
+	const publisher = {
+		name: siteName,
+		url: site,
+		logo: `${site}/logo.png`
+	};
 
 	let {
 		title,
@@ -18,10 +30,45 @@
 		url = site,
 		image = `${site}/og-image.png`,
 		type = 'website',
-		publishedTime
+		publishedTime,
+		modifiedTime
 	}: Props = $props();
 
 	const fullTitle = $derived(title ? `${title} | ${siteName}` : siteName);
+
+	// JSON-LD structured data for articles
+	const jsonLd = $derived(
+		type === 'article' && title
+			? JSON.stringify({
+					'@context': 'https://schema.org',
+					'@type': 'Article',
+					headline: title,
+					description: description,
+					image: image,
+					url: url,
+					datePublished: publishedTime,
+					dateModified: modifiedTime ?? publishedTime,
+					author: {
+						'@type': 'Person',
+						name: author.name,
+						url: author.url
+					},
+					publisher: {
+						'@type': 'Organization',
+						name: publisher.name,
+						url: publisher.url,
+						logo: {
+							'@type': 'ImageObject',
+							url: publisher.logo
+						}
+					},
+					mainEntityOfPage: {
+						'@type': 'WebPage',
+						'@id': url
+					}
+				})
+			: null
+	);
 </script>
 
 <svelte:head>
@@ -39,10 +86,18 @@
 	{#if publishedTime}
 		<meta property="article:published_time" content={publishedTime} />
 	{/if}
+	{#if modifiedTime}
+		<meta property="article:modified_time" content={modifiedTime} />
+	{/if}
 
 	<!-- Twitter Card -->
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={fullTitle} />
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content={image} />
+
+	<!-- JSON-LD Structured Data -->
+	{#if jsonLd}
+		{@html `<script type="application/ld+json">${jsonLd}</script>`}
+	{/if}
 </svelte:head>

@@ -142,21 +142,24 @@
 	.state-container {
 		display: flex;
 		justify-content: flex-end;
+		align-items: center;
 		min-width: 10rem;
+		height: 1.6rem; /* Fixed height prevents vertical shift */
 	}
 
 	.content {
 		white-space: nowrap;
+		line-height: 1.6;
 	}
 
-	/* Wipe-in animation using clip-path */
+	/* Wipe-in animation from right (since right-aligned) */
 	.wipe-in {
 		animation: wipeIn 0.25s ease-out forwards;
 	}
 
 	@keyframes wipeIn {
 		from {
-			clip-path: inset(0 100% 0 0);
+			clip-path: inset(0 0 0 100%);
 			opacity: 0.5;
 		}
 		to {

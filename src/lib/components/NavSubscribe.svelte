@@ -101,68 +101,67 @@
 	role="group"
 	aria-label="Subscribe options"
 >
-	<!-- Label always rendered to reserve space, hidden when not idle -->
-	<span class="label" class:hidden={status !== 'idle'}>subscribe</span>
-	<!-- Other states positioned absolutely, animate with wipe -->
-	{#if status === 'expanded'}
-		<div class="overlay options wipe-in wipe-in--right">
-			<button class="option" onclick={showEmailInput} type="button">email</button>
-			<span class="sep">/</span>
-			<a href="/rss.xml" class="option">rss</a>
-		</div>
-	{:else if status === 'input' || status === 'loading'}
-		<form class="overlay input-form wipe-in wipe-in--right" onsubmit={handleSubmit}>
-			<input
-				bind:this={inputRef}
-				type="email"
-				bind:value={email}
-				placeholder="your@email"
-				required
-				disabled={status === 'loading'}
-				onblur={handleInputBlur}
-				onkeydown={handleKeydown}
-			/>
-			<button type="submit" disabled={status === 'loading'} aria-label="Submit">
-				{status === 'loading' ? '..' : '>'}
-			</button>
-			<button type="button" class="close" onclick={reset} aria-label="Cancel">x</button>
-		</form>
-	{:else if status === 'success' || status === 'error'}
-		<span class="overlay msg wipe-in wipe-in--right" class:error={status === 'error'}>{message}</span>
-	{/if}
+	<!-- All states stack in same position, animate with wipe -->
+	<div class="state-container">
+		{#if status === 'idle'}
+			<span class="content wipe-in wipe-in--right">subscribe</span>
+		{:else if status === 'expanded'}
+			<div class="content options wipe-in wipe-in--right">
+				<button class="option" onclick={showEmailInput} type="button">email</button>
+				<span class="sep">/</span>
+				<a href="/rss.xml" class="option">rss</a>
+			</div>
+		{:else if status === 'input' || status === 'loading'}
+			<form class="content input-form wipe-in wipe-in--right" onsubmit={handleSubmit}>
+				<input
+					bind:this={inputRef}
+					type="email"
+					bind:value={email}
+					placeholder="your@email"
+					required
+					disabled={status === 'loading'}
+					onblur={handleInputBlur}
+					onkeydown={handleKeydown}
+				/>
+				<button type="submit" disabled={status === 'loading'} aria-label="Submit">
+					{status === 'loading' ? '..' : '>'}
+				</button>
+				<button type="button" class="close" onclick={reset} aria-label="Cancel">x</button>
+			</form>
+		{:else if status === 'success' || status === 'error'}
+			<span class="content msg wipe-in wipe-in--right" class:error={status === 'error'}>{message}</span>
+		{/if}
+	</div>
 </div>
 
 <style>
 	.nav-subscribe {
 		position: relative;
-		display: flex;
-		justify-content: flex-end;
-		min-width: 10rem;
 	}
 
-	/* Label always reserves space */
-	.label {
+	.state-container {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		min-width: 10rem;
+		height: 1.6rem; /* Fixed height prevents vertical shift */
+	}
+
+	.content {
+		white-space: nowrap;
+		line-height: 1.6;
+	}
+
+	/* Idle state */
+	.state-container > span:not(.msg) {
 		color: var(--matrix-green-dim);
 		cursor: default;
 		transition: color 0.15s ease, text-shadow 0.15s ease;
-		white-space: nowrap;
 	}
 
-	.label.hidden {
-		visibility: hidden;
-	}
-
-	.nav-subscribe:hover .label:not(.hidden) {
+	.nav-subscribe:hover .state-container > span:not(.msg) {
 		color: var(--matrix-green);
 		text-shadow: 0 0 10px var(--matrix-green-glow);
-	}
-
-	/* Overlay states - positioned absolutely */
-	.overlay {
-		position: absolute;
-		right: 0;
-		top: 0;
-		white-space: nowrap;
 	}
 
 	/* Options */

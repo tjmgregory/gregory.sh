@@ -39,7 +39,7 @@
 	// Homepage gets tagline, other pages get "Page | siteName"
 	const isHomepage = $derived(url === site || url === `${site}/`);
 	const fullTitle = $derived(
-		title ? `${title} | ${siteName}` : `${siteName} — ${tagline}`
+		title ? `${title} | ${siteName}` : `${author.name} — ${tagline}`
 	);
 
 	// JSON-LD structured data

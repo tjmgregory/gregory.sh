@@ -6,8 +6,10 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const WELCOME_TEXT = "Hey, I'm Theo. Welcome to the build.";
+	const WELCOME_LINES = ["Hey, I'm Theo.", 'Welcome to the build.'];
+	const WELCOME_TEXT = WELCOME_LINES.join('\n');
 	const TYPING_SPEED = 70; // ms per character
+	const PUNCTUATION_PAUSE = 250; // extra pause after , or .
 	const INITIAL_DELAY = 1000; // cursor blink before typing
 	const POST_TYPING_DELAY = 500; // pause after typing
 
@@ -31,7 +33,12 @@
 		// Phase 2: Type out the welcome message
 		for (let i = 0; i <= WELCOME_TEXT.length; i++) {
 			typedText = WELCOME_TEXT.slice(0, i);
+			const justTyped = WELCOME_TEXT[i - 1];
 			await sleep(TYPING_SPEED);
+			// Pause after punctuation for natural rhythm
+			if (justTyped === ',' || justTyped === '.') {
+				await sleep(PUNCTUATION_PAUSE);
+			}
 		}
 
 		// Phase 3: Short pause
@@ -95,6 +102,7 @@
 <style>
 	.welcome-text {
 		margin: 0;
+		white-space: pre-line;
 	}
 
 	.invisible {

@@ -161,11 +161,11 @@ li::marker {
 }
 
 .site-nav a {
-	border-bottom: none;
+	border-bottom: 1px solid transparent;
 }
 
 .site-nav a:hover {
-	border-bottom: 1px solid var(--matrix-green);
+	border-bottom-color: var(--matrix-green);
 }
 
 /* Post list */

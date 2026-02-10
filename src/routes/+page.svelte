@@ -10,6 +10,8 @@
 	const WELCOME_TEXT = WELCOME_LINES.join('\n');
 	const TYPING_SPEED = 70; // ms per character
 	const PUNCTUATION_PAUSE = 250; // extra pause after , or .
+	const LINE_END_PAUSE = 600; // pause at end of first line
+	const NEW_LINE_PAUSE = 400; // pause at start of new line
 	const INITIAL_DELAY = 1000; // cursor blink before typing
 	const POST_TYPING_DELAY = 500; // pause after typing
 
@@ -34,9 +36,16 @@
 		for (let i = 0; i <= WELCOME_TEXT.length; i++) {
 			typedText = WELCOME_TEXT.slice(0, i);
 			const justTyped = WELCOME_TEXT[i - 1];
+			const nextChar = WELCOME_TEXT[i];
 			await sleep(TYPING_SPEED);
-			// Pause after punctuation for natural rhythm
-			if (justTyped === ',' || justTyped === '.') {
+			// Pause at end of line (before newline)
+			if (justTyped === '.' && nextChar === '\n') {
+				await sleep(LINE_END_PAUSE);
+			} else if (justTyped === '\n') {
+				// Pause at start of new line
+				await sleep(NEW_LINE_PAUSE);
+			} else if (justTyped === ',' || justTyped === '.') {
+				// Normal punctuation pause
 				await sleep(PUNCTUATION_PAUSE);
 			}
 		}

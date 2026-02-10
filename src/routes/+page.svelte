@@ -6,7 +6,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const WELCOME_TEXT = 'Welcome to the system.';
+	const WELCOME_TEXT = "Hey, I'm Theo. Welcome to the build.";
 	const TYPING_SPEED = 70; // ms per character
 	const INITIAL_DELAY = 1000; // cursor blink before typing
 	const POST_TYPING_DELAY = 500; // pause after typing

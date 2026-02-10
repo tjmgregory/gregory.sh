@@ -13,7 +13,7 @@
 
 <div class="container">
 	<header class="site-header" class:invisible={duringIntro} class:fade-in={shouldAnimate}>
-		<h1 class="site-title">gregory.sh</h1>
+		<div class="site-title">gregory.sh</div>
 		<nav class="site-nav">
 			<div class="nav-links">
 				<a href="/">home</a>

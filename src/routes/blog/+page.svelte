@@ -7,7 +7,7 @@
 
 <Seo
 	title="Blog"
-	description="Articles on building in public, software engineering, and making things."
+	description="Articles on AI-assisted development, building startups with agents, and lessons from shipping software solo."
 	url="https://gregory.sh/blog"
 />
 

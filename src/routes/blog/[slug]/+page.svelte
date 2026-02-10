@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { error } from '@sveltejs/kit';
 	import { getPost } from '$lib/posts';
-	import { Seo, FormattedDate } from '$lib';
+	import { Seo, FormattedDate, ArticleSubscribeCta } from '$lib';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -34,6 +34,8 @@
 	</div>
 </article>
 
-<p style="margin-top: 3rem;">
+<ArticleSubscribeCta />
+
+<p style="margin-top: 2rem;">
 	<a href="/blog">← Back to archives</a>
 </p>

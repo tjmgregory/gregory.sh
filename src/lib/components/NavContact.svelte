@@ -59,12 +59,14 @@
 <style>
 	.nav-contact {
 		position: relative;
+		flex-shrink: 0;
 	}
 
 	.state-container {
 		display: flex;
 		justify-content: flex-start;
 		align-items: center;
+		width: 8.5rem; /* Fixed width for "email / linkedin" */
 		height: 1.6rem;
 	}
 
@@ -73,7 +75,7 @@
 		line-height: 1.6;
 	}
 
-	/* Wipe-in animation from left (since left-aligned) */
+	/* Wipe-in animation from left */
 	.wipe-in {
 		animation: wipeIn 0.25s ease-out forwards;
 	}

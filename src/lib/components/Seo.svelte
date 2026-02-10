@@ -11,7 +11,8 @@
 
 	const site = 'https://gregory.sh';
 	const siteName = 'gregory.sh';
-	const defaultDescription = 'Building in public - thoughts on software, startups, and making things.';
+	const defaultDescription =
+		'Theo Gregory builds companies with AI agents. Ex-Head of Engineering sharing real lessons on AI-assisted development, solo startups, and shipping fast.';
 
 	const author = {
 		name: 'Theo Gregory',

@@ -4,7 +4,8 @@ import type { RequestHandler } from './$types';
 
 const SITE_URL = 'https://gregory.sh';
 const SITE_TITLE = 'gregory.sh';
-const SITE_DESCRIPTION = 'Building in public. Software, startups, and shipping.';
+const SITE_DESCRIPTION =
+	'Theo Gregory builds companies with AI agents. Ex-Head of Engineering sharing real lessons on AI-assisted development, solo startups, and shipping fast.';
 
 function escapeXml(text: string): string {
 	return text

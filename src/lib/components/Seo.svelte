@@ -36,10 +36,10 @@
 		modifiedTime
 	}: Props = $props();
 
-	// Homepage gets tagline, other pages get "Page | siteName"
+	// Homepage gets tagline, other pages get "Page | Name"
 	const isHomepage = $derived(url === site || url === `${site}/`);
 	const fullTitle = $derived(
-		title ? `${title} | ${siteName}` : `${author.name} — ${tagline}`
+		title ? `${title} | ${author.name}` : `${author.name} — ${tagline}`
 	);
 
 	// JSON-LD structured data

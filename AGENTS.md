@@ -122,6 +122,14 @@ Current phase: **Inception** (ready to move to Construction)
 - **Static generation** over SSR — fastest possible, SEO-first
 - **Minimal MVP** — ship fast, iterate in public
 
+## CSS / Responsive
+
+**Mobile-first.** Base styles target mobile, then scale up with `min-width` media queries.
+
+- Breakpoint: `600px` (single breakpoint for simplicity)
+- Base styles = mobile
+- `@media (min-width: 600px)` = desktop adjustments
+
 ## Landing the Plane (Session Completion)
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.

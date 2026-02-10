@@ -127,14 +127,14 @@ li::marker {
 .container {
 	max-width: 700px;
 	margin: 0 auto;
-	padding: 2rem 1rem;
+	padding: 1rem;
 }
 
 /* Header */
 .site-header {
-	padding: 2rem 0;
+	padding: 1rem 0;
 	border-bottom: 1px solid var(--matrix-green-dim);
-	margin-bottom: 2rem;
+	margin-bottom: 1rem;
 }
 
 .site-title {
@@ -161,11 +161,11 @@ li::marker {
 }
 
 .site-nav a {
-	border-bottom: none;
+	border-bottom: 1px solid transparent;
 }
 
 .site-nav a:hover {
-	border-bottom: 1px solid var(--matrix-green);
+	border-bottom-color: var(--matrix-green);
 }
 
 /* Post list */
@@ -226,4 +226,16 @@ li::marker {
 .cursor::after {
 	content: '█';
 	animation: blink 1s infinite;
+}
+
+/* Desktop */
+@media (min-width: 600px) {
+	.container {
+		padding: 2rem 1rem;
+	}
+
+	.site-header {
+		padding: 2rem 0;
+		margin-bottom: 2rem;
+	}
 }

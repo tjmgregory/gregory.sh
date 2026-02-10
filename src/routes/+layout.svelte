@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { NavSubscribe, introComplete, shouldAnimateFadeIn } from '$lib';
+	import { NavSubscribe, NavContact, introComplete, shouldAnimateFadeIn } from '$lib';
 	import { page } from '$app/stores';
 
 	let { children } = $props();
@@ -13,11 +13,11 @@
 
 <div class="container">
 	<header class="site-header" class:invisible={duringIntro} class:fade-in={shouldAnimate}>
-		<div class="site-title">gregory.sh</div>
+		<a href="/" class="site-title-link"><div class="site-title">gregory.sh</div></a>
 		<nav class="site-nav">
-			<div class="nav-links">
-				<a href="/">home</a>
+			<div class="nav-left">
 				<a href="/blog">blog</a>
+				<NavContact />
 			</div>
 			<NavSubscribe />
 		</nav>
@@ -45,5 +45,24 @@
 		to {
 			opacity: 1;
 		}
+	}
+
+	.site-title-link {
+		border-bottom: none;
+		text-decoration: none;
+	}
+
+	.site-title-link:hover {
+		text-shadow: none;
+	}
+
+	.site-title-link:hover .site-title {
+		text-shadow: 0 0 20px var(--matrix-green-glow);
+	}
+
+	.nav-left {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
 	}
 </style>

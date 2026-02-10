@@ -5,7 +5,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	server: {
 		fs: {
-			allow: ['content']
+			// Allow serving from main repo (for worktree node_modules access)
+			allow: ['content', '../..']
 		}
 	}
 });

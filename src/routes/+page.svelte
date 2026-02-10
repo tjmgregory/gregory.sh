@@ -6,7 +6,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const WELCOME_LINES = ["Hey, I'm Theo.", 'Welcome to the build.'];
+	const WELCOME_LINES = ["Hey, I'm Theo.", 'Welcome to my lab.'];
 	const WELCOME_TEXT = WELCOME_LINES.join('\n');
 	const TYPING_SPEED = 70; // ms per character
 	const PUNCTUATION_PAUSE = 250; // extra pause after , or .

@@ -2,9 +2,6 @@ name: SEO Check
 
 on:
   pull_request:
-    paths:
-      - 'content/posts/**'
-      - 'static/og/**'
 
 jobs:
   validate:
@@ -15,18 +12,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check for content changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            content:
+              - 'content/posts/**'
+              - 'static/og/**'
+
+      - name: Skip if no content changes
+        if: steps.changes.outputs.content == 'false'
+        run: echo "No content changes, skipping SEO validation"
+
       - name: Setup Bun
+        if: steps.changes.outputs.content == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install dependencies
+        if: steps.changes.outputs.content == 'true'
         run: bun install
 
       - name: Validate SEO requirements
+        if: steps.changes.outputs.content == 'true'
         run: bun run seo:validate
 
       - name: Check OG images exist
+        if: steps.changes.outputs.content == 'true'
         run: |
           for post in content/posts/*.md; do
             slug=$(basename "$post" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')

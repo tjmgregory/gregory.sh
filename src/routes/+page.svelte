@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Seo } from '$lib';
+	import { Seo, FormattedDate } from '$lib';
 
 	let { data }: { data: PageData } = $props();
 </script>
@@ -17,7 +17,7 @@
 	<ul class="post-list">
 		{#each data.posts as post}
 			<li class="post-item">
-				<span class="post-date">{post.date}</span>
+				<span class="post-date"><FormattedDate datetime={post.date} /></span>
 				<h3 class="post-title">
 					<a href="/blog/{post.slug}">{post.title}</a>
 				</h3>

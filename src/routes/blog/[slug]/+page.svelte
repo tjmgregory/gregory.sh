@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { error } from '@sveltejs/kit';
 	import { getPost } from '$lib/posts';
-	import { Seo } from '$lib';
+	import { Seo, FormattedDate } from '$lib';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -26,7 +26,7 @@
 <article>
 	<header class="post-header">
 		<h1>{post.title}</h1>
-		<p class="post-meta">{post.date}</p>
+		<p class="post-meta"><FormattedDate datetime={post.date} /></p>
 	</header>
 
 	<div class="post-content">

@@ -155,6 +155,7 @@
 	/* Wipe-in animation from right (since right-aligned) */
 	.wipe-in {
 		animation: wipeIn 0.25s ease-out forwards;
+		will-change: clip-path, opacity;
 	}
 
 	@keyframes wipeIn {

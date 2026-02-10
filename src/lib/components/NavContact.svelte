@@ -65,7 +65,6 @@
 		display: flex;
 		justify-content: flex-start;
 		align-items: center;
-		min-width: 10rem;
 		height: 1.6rem;
 	}
 

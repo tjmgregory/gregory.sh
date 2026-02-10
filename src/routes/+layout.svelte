@@ -15,9 +15,9 @@
 	<header class="site-header" class:invisible={duringIntro} class:fade-in={shouldAnimate}>
 		<a href="/" class="site-title-link"><div class="site-title">gregory.sh</div></a>
 		<nav class="site-nav">
-			<NavContact />
-			<div class="nav-links">
+			<div class="nav-left">
 				<a href="/blog">blog</a>
+				<NavContact />
 			</div>
 			<NavSubscribe />
 		</nav>
@@ -58,5 +58,11 @@
 
 	.site-title-link:hover .site-title {
 		text-shadow: 0 0 20px var(--matrix-green-glow);
+	}
+
+	.nav-left {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
 	}
 </style>

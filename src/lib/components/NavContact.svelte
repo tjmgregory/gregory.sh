@@ -38,21 +38,22 @@
 	role="group"
 	aria-label="Contact options"
 >
-	<!-- Always render label to reserve space, hide when expanded -->
-	<span class="label" class:hidden={status === 'expanded'}>contact</span>
-	<!-- Options positioned absolutely to avoid layout shift -->
-	{#if status === 'expanded'}
-		<div class="options wipe-in wipe-in--left">
-			<button class="option" onclick={handleEmailClick} type="button">email</button>
-			<span class="sep">/</span>
-			<a
-				href="https://linkedin.com/in/tjmgregory"
-				class="option"
-				target="_blank"
-				rel="noopener noreferrer">linkedin</a
-			>
-		</div>
-	{/if}
+	<div class="state-container">
+		{#if status === 'idle'}
+			<span class="label wipe-in wipe-in--left">contact</span>
+		{:else}
+			<div class="options wipe-in wipe-in--left">
+				<button class="option" onclick={handleEmailClick} type="button">email</button>
+				<span class="sep">/</span>
+				<a
+					href="https://linkedin.com/in/tjmgregory"
+					class="option"
+					target="_blank"
+					rel="noopener noreferrer">linkedin</a
+				>
+			</div>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -60,28 +61,27 @@
 		position: relative;
 	}
 
-	/* Label always reserves space */
+	.state-container {
+		display: flex;
+		align-items: center;
+		min-width: 7rem;
+		height: 1.6rem;
+	}
+
 	.label {
 		color: var(--matrix-green-dim);
 		cursor: default;
 		transition: color 0.15s ease, text-shadow 0.15s ease;
 		white-space: nowrap;
+		line-height: 1.6;
 	}
 
-	.label.hidden {
-		visibility: hidden;
-	}
-
-	.nav-contact:hover .label:not(.hidden) {
+	.nav-contact:hover .label {
 		color: var(--matrix-green);
 		text-shadow: 0 0 10px var(--matrix-green-glow);
 	}
 
-	/* Options overlay - positioned absolutely */
 	.options {
-		position: absolute;
-		left: 0;
-		top: 0;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;

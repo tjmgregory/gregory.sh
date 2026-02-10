@@ -104,15 +104,15 @@
 	<!-- All states stack in same position, animate with wipe -->
 	<div class="state-container">
 		{#if status === 'idle'}
-			<span class="content wipe-in">subscribe</span>
+			<span class="content wipe-in wipe-in--right">subscribe</span>
 		{:else if status === 'expanded'}
-			<div class="content options wipe-in">
+			<div class="content options wipe-in wipe-in--right">
 				<button class="option" onclick={showEmailInput} type="button">email</button>
 				<span class="sep">/</span>
 				<a href="/rss.xml" class="option">rss</a>
 			</div>
 		{:else if status === 'input' || status === 'loading'}
-			<form class="content input-form wipe-in" onsubmit={handleSubmit}>
+			<form class="content input-form wipe-in wipe-in--right" onsubmit={handleSubmit}>
 				<input
 					bind:this={inputRef}
 					type="email"
@@ -129,7 +129,7 @@
 				<button type="button" class="close" onclick={reset} aria-label="Cancel">x</button>
 			</form>
 		{:else if status === 'success' || status === 'error'}
-			<span class="content msg wipe-in" class:error={status === 'error'}>{message}</span>
+			<span class="content msg wipe-in wipe-in--right" class:error={status === 'error'}>{message}</span>
 		{/if}
 	</div>
 </div>
@@ -150,22 +150,6 @@
 	.content {
 		white-space: nowrap;
 		line-height: 1.6;
-	}
-
-	/* Wipe-in animation from right (since right-aligned) */
-	.wipe-in {
-		animation: wipeIn 0.25s ease-out forwards;
-	}
-
-	@keyframes wipeIn {
-		from {
-			clip-path: inset(0 0 0 100%);
-			opacity: 0.5;
-		}
-		to {
-			clip-path: inset(0 0 0 0);
-			opacity: 1;
-		}
 	}
 
 	/* Idle state */

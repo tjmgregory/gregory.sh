@@ -228,6 +228,31 @@ li::marker {
 	animation: blink 1s infinite;
 }
 
+/* Wipe-in animation utility */
+.wipe-in {
+	animation: wipeIn 0.25s ease-out forwards;
+	will-change: clip-path, opacity;
+}
+
+.wipe-in--left {
+	--wipe-from: inset(0 100% 0 0);
+}
+
+.wipe-in--right {
+	--wipe-from: inset(0 0 0 100%);
+}
+
+@keyframes wipeIn {
+	from {
+		clip-path: var(--wipe-from);
+		opacity: 0.5;
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+		opacity: 1;
+	}
+}
+
 /* Desktop */
 @media (min-width: 600px) {
 	.container {

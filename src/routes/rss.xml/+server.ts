@@ -50,6 +50,12 @@ export const GET: RequestHandler = async ({ request, platform }) => {
 		<description>${escapeXml(SITE_DESCRIPTION)}</description>
 		<language>en-au</language>
 		<atom:link href="${SITE_URL}/rss.xml" rel="self" type="application/rss+xml"/>
+		<atom:icon>${SITE_URL}/favicon.svg</atom:icon>
+		<image>
+			<url>${SITE_URL}/favicon.svg</url>
+			<title>${escapeXml(SITE_TITLE)}</title>
+			<link>${SITE_URL}</link>
+		</image>
 		<lastBuildDate>${new Date().toUTCString()}</lastBuildDate>${items}
 	</channel>
 </rss>`;

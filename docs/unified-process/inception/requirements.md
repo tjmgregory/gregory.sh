@@ -90,6 +90,76 @@
 - Then an OG image is generated with post title
 - And the image meets platform size requirements (1200x630)
 
+### Matrix Rain Entrance Effect (G-009)
+
+| ID | Requirement | Priority | Traces To |
+|----|-------------|----------|-----------|
+| REQ-011 | Page content must be extractable to a character grid where each character has a column and row position | P2 | G-009 |
+| REQ-012 | On page load, characters must animate from a "falling rain" state to their final grid positions | P2 | G-009 |
+| REQ-013 | During the rain phase, characters must display random Matrix-style glyphs (katakana, numbers) before settling to correct characters | P2 | G-009 |
+| REQ-014 | The animation must complete within 3 seconds to avoid blocking content access | P2 | G-009 |
+| REQ-015 | Links and interactive elements must remain functional after animation completes | P1 | G-009 |
+| REQ-016 | The effect must be disabled when user has `prefers-reduced-motion` enabled | P1 | G-009 |
+| REQ-017 | The grid must recalculate on viewport resize to handle responsive line breaks | P3 | G-009 |
+| REQ-018 | Page-to-page navigation should trigger a dissolve → rain → settle transition | P3 | G-009 |
+
+### Acceptance Criteria
+
+**REQ-011: Character grid extraction**
+- Given any page with text content
+- When the animation system initializes
+- Then every visible character has a computed (col, row) position
+- And positions account for line wrapping at viewport width
+- And non-text elements (images, etc.) are excluded from the grid
+
+**REQ-012: Rain-to-settle animation**
+- Given extracted character positions
+- When the page loads
+- Then characters start above the viewport at their correct column
+- And characters animate downward with varied timing per column
+- And characters come to rest at their final (col, row) positions
+- And the animation uses CSS transforms (GPU-accelerated)
+
+**REQ-013: Character cycling**
+- Given the rain animation is in progress
+- When a character is falling
+- Then it displays random Matrix glyphs (katakana, latin, numbers)
+- And glyph changes are staggered for visual effect
+- And the correct character is revealed as the character settles
+
+**REQ-014: Animation duration**
+- Given the rain animation
+- When measuring from page load to content readable
+- Then total time is under 3 seconds
+- And users can interact with content after animation
+
+**REQ-015: Post-animation interactivity**
+- Given the animation has completed
+- When the user interacts with the page
+- Then links are clickable
+- And text is selectable
+- And page behaves as standard DOM
+
+**REQ-016: Reduced motion**
+- Given a user with `prefers-reduced-motion: reduce`
+- When the page loads
+- Then no rain animation occurs
+- And content is immediately visible
+
+**REQ-017: Responsive grid**
+- Given a viewport resize
+- When line breaks change
+- Then character grid is recalculated
+- And characters animate to new positions (if animation active)
+- Or are immediately repositioned (if settled)
+
+**REQ-018: Page transitions**
+- Given navigation between pages
+- When the user clicks a link
+- Then current content dissolves (rain effect in reverse or fade to rain)
+- And new content settles from rain
+- And URL updates appropriately
+
 ## Non-Functional Requirements
 
 | ID | Requirement | Metric | Traces To |
@@ -97,6 +167,9 @@
 | NFR-001 | Build time must remain acceptable with SEO pipeline | < 60s for 50 posts | G-004.2 |
 | NFR-002 | SEO pipeline must not require external services at runtime | Zero runtime dependencies | G-007 |
 | NFR-003 | Generated descriptions must be coherent and grammatical | Manual review pass rate > 90% | G-004.7 |
+| NFR-004 | Matrix rain animation must maintain 60fps on modern devices | No dropped frames on 2020+ hardware | G-009, G-004.2 |
+| NFR-005 | Animation must not increase page weight significantly | < 10KB additional JS (gzipped) | G-009, G-004.2 |
+| NFR-006 | Animation must not delay First Contentful Paint | FCP unaffected vs. no-animation baseline | G-009, G-004.2 |
 
 ## Open Questions
 
@@ -118,3 +191,11 @@
 | REQ-008 | UC-002 (planned) | TC-008 (planned) |
 | REQ-009 | UC-002 (planned) | TC-009 (planned) |
 | REQ-010 | UC-002 (planned) | TC-010 (planned) |
+| REQ-011 | UC-004 (planned) | TC-011 (planned) |
+| REQ-012 | UC-004 (planned) | TC-012 (planned) |
+| REQ-013 | UC-004 (planned) | TC-013 (planned) |
+| REQ-014 | UC-004 (planned) | TC-014 (planned) |
+| REQ-015 | UC-004 (planned) | TC-015 (planned) |
+| REQ-016 | UC-004 (planned) | TC-016 (planned) |
+| REQ-017 | UC-004 (planned) | TC-017 (planned) |
+| REQ-018 | UC-005 (planned) | TC-018 (planned) |

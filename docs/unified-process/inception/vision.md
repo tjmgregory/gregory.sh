@@ -48,6 +48,27 @@ For **Theo Gregory**, who wants to share learnings, projects, and thinking publi
 - Dark mode (can add later)
 - Custom CMS/admin UI
 
+## G-009: Matrix Rain Entrance Effect
+
+The site should embody its terminal/Matrix aesthetic not just visually but experientially. On page load, content should materialize from digital rain—characters falling and settling into their final positions to reveal the actual page content.
+
+**Intent:**
+- Reinforce the Matrix/terminal theme as more than skin-deep
+- Create a memorable, distinctive first impression
+- Make page transitions feel cohesive with the visual identity
+
+**Constraints:**
+- Must work with dynamic content (any page, any text)
+- Must be responsive (recalculates on viewport change)
+- Must respect `prefers-reduced-motion` (accessibility)
+- Must not block content access (animation completes in reasonable time)
+- Requires monospace font throughout (already the case)
+
+**Scope considerations:**
+- Could be initial load only, or every page transition
+- Could be full page, or hero section only
+- Complexity vs. impact trade-off to be evaluated
+
 ## G-007: Technical Constraints
 
 - **SvelteKit** with static adapter for Cloudflare Pages

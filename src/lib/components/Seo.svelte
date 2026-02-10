@@ -11,6 +11,7 @@
 
 	const site = 'https://gregory.sh';
 	const siteName = 'gregory.sh';
+	const tagline = 'Building Startups with AI Agents';
 	const defaultDescription =
 		'Theo Gregory builds companies with AI agents. Ex-Head of Engineering sharing real lessons on AI-assisted development, solo startups, and shipping fast.';
 
@@ -35,41 +36,77 @@
 		modifiedTime
 	}: Props = $props();
 
-	const fullTitle = $derived(title ? `${title} | ${siteName}` : siteName);
+	// Homepage gets tagline, other pages get "Page | Name"
+	const isHomepage = $derived(url === site || url === `${site}/`);
+	const fullTitle = $derived(
+		title ? `${title} | ${author.name}` : `${author.name} — ${tagline}`
+	);
 
-	// JSON-LD structured data for articles
-	const jsonLd = $derived(
-		type === 'article' && title
-			? JSON.stringify({
+	// JSON-LD structured data
+	const jsonLd = $derived.by(() => {
+		if (type === 'article' && title) {
+			// Article schema for blog posts
+			return JSON.stringify({
+				'@context': 'https://schema.org',
+				'@type': 'Article',
+				headline: title,
+				description: description,
+				image: image,
+				url: url,
+				datePublished: publishedTime,
+				dateModified: modifiedTime ?? publishedTime,
+				author: {
+					'@type': 'Person',
+					name: author.name,
+					url: author.url
+				},
+				publisher: {
+					'@type': 'Organization',
+					name: publisher.name,
+					url: publisher.url,
+					logo: {
+						'@type': 'ImageObject',
+						url: publisher.logo
+					}
+				},
+				mainEntityOfPage: {
+					'@type': 'WebPage',
+					'@id': url
+				}
+			});
+		}
+
+		if (isHomepage) {
+			// Person + WebSite schema for homepage
+			return JSON.stringify([
+				{
 					'@context': 'https://schema.org',
-					'@type': 'Article',
-					headline: title,
-					description: description,
-					image: image,
-					url: url,
-					datePublished: publishedTime,
-					dateModified: modifiedTime ?? publishedTime,
+					'@type': 'WebSite',
+					name: siteName,
+					url: site,
+					description: defaultDescription,
 					author: {
 						'@type': 'Person',
-						name: author.name,
-						url: author.url
-					},
-					publisher: {
-						'@type': 'Organization',
-						name: publisher.name,
-						url: publisher.url,
-						logo: {
-							'@type': 'ImageObject',
-							url: publisher.logo
-						}
-					},
-					mainEntityOfPage: {
-						'@type': 'WebPage',
-						'@id': url
+						name: author.name
 					}
-				})
-			: null
-	);
+				},
+				{
+					'@context': 'https://schema.org',
+					'@type': 'Person',
+					name: author.name,
+					url: site,
+					jobTitle: 'Software Engineer & Founder',
+					description: defaultDescription,
+					sameAs: [
+						'https://github.com/thgregory',
+						'https://x.com/thgregory'
+					]
+				}
+			]);
+		}
+
+		return null;
+	});
 </script>
 
 <svelte:head>

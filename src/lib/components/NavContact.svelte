@@ -42,7 +42,7 @@
 	<span class="label" class:hidden={status === 'expanded'}>contact</span>
 	<!-- Options positioned absolutely to avoid layout shift -->
 	{#if status === 'expanded'}
-		<div class="options wipe-in">
+		<div class="options wipe-in wipe-in--left">
 			<button class="option" onclick={handleEmailClick} type="button">email</button>
 			<span class="sep">/</span>
 			<a
@@ -86,22 +86,6 @@
 		align-items: center;
 		gap: 0.5rem;
 		white-space: nowrap;
-	}
-
-	/* Wipe-in animation from left */
-	.wipe-in {
-		animation: wipeIn 0.25s ease-out forwards;
-	}
-
-	@keyframes wipeIn {
-		from {
-			clip-path: inset(0 100% 0 0);
-			opacity: 0.5;
-		}
-		to {
-			clip-path: inset(0 0 0 0);
-			opacity: 1;
-		}
 	}
 
 	.option {

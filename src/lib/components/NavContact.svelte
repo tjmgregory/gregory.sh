@@ -38,41 +38,54 @@
 	role="group"
 	aria-label="Contact options"
 >
-	<div class="state-container">
-		{#if status === 'idle'}
-			<span class="content wipe-in">contact</span>
-		{:else if status === 'expanded'}
-			<div class="content options wipe-in">
-				<button class="option" onclick={handleEmailClick} type="button">email</button>
-				<span class="sep">/</span>
-				<a
-					href="https://linkedin.com/in/tjmgregory"
-					class="option"
-					target="_blank"
-					rel="noopener noreferrer">linkedin</a
-				>
-			</div>
-		{/if}
-	</div>
+	<!-- Always render label to reserve space, hide when expanded -->
+	<span class="label" class:hidden={status === 'expanded'}>contact</span>
+	<!-- Options positioned absolutely to avoid layout shift -->
+	{#if status === 'expanded'}
+		<div class="options wipe-in">
+			<button class="option" onclick={handleEmailClick} type="button">email</button>
+			<span class="sep">/</span>
+			<a
+				href="https://linkedin.com/in/tjmgregory"
+				class="option"
+				target="_blank"
+				rel="noopener noreferrer">linkedin</a
+			>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.nav-contact {
 		position: relative;
-		flex-shrink: 0;
 	}
 
-	.state-container {
-		display: flex;
-		justify-content: flex-start;
-		align-items: center;
-		width: 8.5rem; /* Fixed width for "email / linkedin" */
-		height: 1.6rem;
-	}
-
-	.content {
+	/* Label always reserves space */
+	.label {
+		color: var(--matrix-green-dim);
+		cursor: default;
+		transition: color 0.15s ease, text-shadow 0.15s ease;
 		white-space: nowrap;
-		line-height: 1.6;
+	}
+
+	.label.hidden {
+		visibility: hidden;
+	}
+
+	.nav-contact:hover .label:not(.hidden) {
+		color: var(--matrix-green);
+		text-shadow: 0 0 10px var(--matrix-green-glow);
+	}
+
+	/* Options overlay - positioned absolutely */
+	.options {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		white-space: nowrap;
 	}
 
 	/* Wipe-in animation from left */
@@ -89,25 +102,6 @@
 			clip-path: inset(0 0 0 0);
 			opacity: 1;
 		}
-	}
-
-	/* Idle state */
-	.state-container > span {
-		color: var(--matrix-green-dim);
-		cursor: default;
-		transition: color 0.15s ease, text-shadow 0.15s ease;
-	}
-
-	.nav-contact:hover .state-container > span {
-		color: var(--matrix-green);
-		text-shadow: 0 0 10px var(--matrix-green-glow);
-	}
-
-	/* Options */
-	.options {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
 	}
 
 	.option {

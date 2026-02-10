@@ -1,12 +1,18 @@
 <script lang="ts">
 	import '../app.css';
-	import { NavSubscribe } from '$lib';
+	import { NavSubscribe, introComplete, shouldAnimateFadeIn } from '$lib';
+	import { page } from '$app/stores';
 
 	let { children } = $props();
+
+	// Only apply intro styling on homepage
+	let isHomepage = $derived($page.url.pathname === '/');
+	let duringIntro = $derived(isHomepage && !$introComplete);
+	let shouldAnimate = $derived(isHomepage && $shouldAnimateFadeIn && $introComplete);
 </script>
 
 <div class="container">
-	<header class="site-header">
+	<header class="site-header" class:invisible={duringIntro} class:fade-in={shouldAnimate}>
 		<h1 class="site-title">gregory.sh</h1>
 		<nav class="site-nav">
 			<div class="nav-links">
@@ -21,3 +27,23 @@
 		{@render children()}
 	</main>
 </div>
+
+<style>
+	.invisible {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.fade-in {
+		animation: fadeIn 0.6s ease-out forwards;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+</style>

@@ -27,7 +27,7 @@
 		{@render children()}
 	</main>
 
-	<footer class="site-footer">
+	<footer class="site-footer" class:invisible={duringIntro} class:fade-in={shouldAnimate}>
 		<a href="/privacy">privacy</a>
 	</footer>
 </div>

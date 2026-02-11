@@ -64,8 +64,14 @@
 	.state-container {
 		display: flex;
 		align-items: center;
-		min-width: 7rem;
 		height: 1.6rem;
+	}
+
+	/* Desktop: restore min-width for layout stability */
+	@media (min-width: 600px) {
+		.state-container {
+			min-width: 7rem;
+		}
 	}
 
 	.label {
@@ -74,6 +80,7 @@
 		transition: color 0.15s ease, text-shadow 0.15s ease;
 		white-space: nowrap;
 		line-height: 1.6;
+		border-bottom: 1px solid transparent;
 	}
 
 	.nav-contact:hover .label {
@@ -94,6 +101,7 @@
 		color: var(--matrix-green);
 		font-family: var(--font-mono);
 		font-size: 1rem;
+		line-height: 1.6;
 		padding: 0;
 		cursor: pointer;
 		transition: text-shadow 0.15s ease, border-color 0.15s ease;
@@ -111,5 +119,7 @@
 
 	.sep {
 		color: var(--matrix-green-dim);
+		line-height: 1.6;
+		border-bottom: 1px solid transparent;
 	}
 </style>

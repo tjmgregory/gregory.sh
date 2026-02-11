@@ -143,8 +143,14 @@
 		display: flex;
 		justify-content: flex-end;
 		align-items: center;
-		min-width: 10rem;
 		height: 1.6rem; /* Fixed height prevents vertical shift */
+	}
+
+	/* Desktop: restore min-width for layout stability */
+	@media (min-width: 600px) {
+		.state-container {
+			min-width: 10rem;
+		}
 	}
 
 	.content {
@@ -157,6 +163,7 @@
 		color: var(--matrix-green-dim);
 		cursor: default;
 		transition: color 0.15s ease, text-shadow 0.15s ease;
+		border-bottom: 1px solid transparent;
 	}
 
 	.nav-subscribe:hover .state-container > span:not(.msg) {
@@ -177,6 +184,7 @@
 		color: var(--matrix-green);
 		font-family: var(--font-mono);
 		font-size: 1rem;
+		line-height: 1.6;
 		padding: 0;
 		cursor: pointer;
 		transition: text-shadow 0.15s ease, border-color 0.15s ease;
@@ -194,6 +202,8 @@
 
 	.sep {
 		color: var(--matrix-green-dim);
+		line-height: 1.6;
+		border-bottom: 1px solid transparent;
 	}
 
 	/* Input form */

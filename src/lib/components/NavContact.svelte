@@ -64,8 +64,14 @@
 	.state-container {
 		display: flex;
 		align-items: center;
-		min-width: 7rem;
 		height: 1.6rem;
+	}
+
+	/* Desktop: restore min-width for layout stability */
+	@media (min-width: 600px) {
+		.state-container {
+			min-width: 7rem;
+		}
 	}
 
 	.label {

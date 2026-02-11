@@ -143,8 +143,14 @@
 		display: flex;
 		justify-content: flex-end;
 		align-items: center;
-		min-width: 10rem;
 		height: 1.6rem; /* Fixed height prevents vertical shift */
+	}
+
+	/* Desktop: restore min-width for layout stability */
+	@media (min-width: 600px) {
+		.state-container {
+			min-width: 10rem;
+		}
 	}
 
 	.content {

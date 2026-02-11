@@ -90,6 +90,44 @@
 - Then an OG image is generated with post title
 - And the image meets platform size requirements (1200x630)
 
+### GDPR Compliance (G-004.5)
+
+| ID | Requirement | Priority | Traces To |
+|----|-------------|----------|-----------|
+| REQ-GDPR-001 | Site must have a privacy policy page explaining data collection, storage, and user rights | P1 | G-004.5, UK GDPR |
+| REQ-GDPR-002 | Subscribe form must show privacy policy and unsubscribe links before submission | P1 | G-004.5, UK GDPR |
+| REQ-GDPR-003 | Users must be able to unsubscribe with a single form submission, no login required | P1 | G-004.5, PECR |
+| REQ-GDPR-004 | Every marketing email must include an unsubscribe link | P1 | G-004.5, PECR |
+
+### Acceptance Criteria (GDPR)
+
+**REQ-GDPR-001: Privacy policy**
+- Given a visitor to the site
+- When they navigate to /privacy
+- Then they see a clear explanation of what data is collected (email, timestamp)
+- And why it is collected (newsletter updates)
+- And how to exercise their rights (unsubscribe, access, deletion, complain to ICO)
+- And contact information for data controller
+
+**REQ-GDPR-002: Subscribe form consent**
+- Given a user entering their email to subscribe
+- When the email input is active
+- Then links to privacy policy and unsubscribe page are visible
+- And submitting the form constitutes explicit consent
+
+**REQ-GDPR-003: Unsubscribe flow**
+- Given a subscriber wanting to unsubscribe
+- When they visit /unsubscribe and enter their email
+- Then their email is immediately removed from storage
+- And they see confirmation (same message whether email existed or not)
+- And no login or additional steps are required
+
+**REQ-GDPR-004: Email unsubscribe link**
+- Given any marketing email sent to subscribers
+- When the recipient views the email
+- Then an unsubscribe link is present and functional
+- And clicking it leads to /unsubscribe with email pre-filled
+
 ## Non-Functional Requirements
 
 | ID | Requirement | Metric | Traces To |
@@ -108,13 +146,17 @@
 
 | Requirement | Use Cases | Tests |
 |-------------|-----------|-------|
-| REQ-001 | UC-002 (planned) | TC-001 (planned) |
-| REQ-002 | UC-002 (planned) | TC-002 (planned) |
-| REQ-003 | UC-002 (planned) | TC-003 (planned) |
-| REQ-004 | UC-003 (planned) | TC-004 (planned) |
-| REQ-005 | UC-002 (planned) | TC-005 (planned) |
-| REQ-006 | UC-002 (planned) | TC-006 (planned) |
-| REQ-007 | UC-002 (planned) | TC-007 (planned) |
-| REQ-008 | UC-002 (planned) | TC-008 (planned) |
-| REQ-009 | UC-002 (planned) | TC-009 (planned) |
-| REQ-010 | UC-002 (planned) | TC-010 (planned) |
+| REQ-001 | UC-SEO-001 (planned) | TC-001 (planned) |
+| REQ-002 | UC-SEO-001 (planned) | TC-002 (planned) |
+| REQ-003 | UC-SEO-001 (planned) | TC-003 (planned) |
+| REQ-004 | UC-SEO-002 (planned) | TC-004 (planned) |
+| REQ-005 | UC-SEO-001 (planned) | TC-005 (planned) |
+| REQ-006 | UC-SEO-001 (planned) | TC-006 (planned) |
+| REQ-007 | UC-SEO-001 (planned) | TC-007 (planned) |
+| REQ-008 | UC-SEO-001 (planned) | TC-008 (planned) |
+| REQ-009 | UC-SEO-001 (planned) | TC-009 (planned) |
+| REQ-010 | UC-SEO-001 (planned) | TC-010 (planned) |
+| REQ-GDPR-001 | - | Manual review |
+| REQ-GDPR-002 | UC-001 | Manual review |
+| REQ-GDPR-003 | UC-002 | Manual review |
+| REQ-GDPR-004 | - | Manual review (when email sending implemented) |

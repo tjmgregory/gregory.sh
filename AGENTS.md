@@ -122,6 +122,32 @@ Current phase: **Inception** (ready to move to Construction)
 - **Static generation** over SSR — fastest possible, SEO-first
 - **Minimal MVP** — ship fast, iterate in public
 
+## Email Protection
+
+**CRITICAL: NEVER expose plaintext email addresses in code or content.**
+
+All contact emails are base64-encoded and only decoded at click time to prevent scraper harvesting. See `NavContact.svelte` for the pattern:
+
+```typescript
+// Email encoded to prevent scraping
+const encodedEmail = 'c2l0ZUBncmVnb3J5LnNo';
+
+function handleEmailClick() {
+  const email = atob(encodedEmail);
+  window.location.href = 'mailto:' + email;
+}
+```
+
+**NEVER:**
+- Put `mailto:user@domain.com` in HTML
+- Write plaintext email addresses in templates
+- Expose email in any form that can be scraped from source
+
+**ALWAYS:**
+- Use the base64 encode pattern above
+- Decode only on user interaction (click)
+- Use a button with onclick handler, not an anchor tag
+
 ## CSS / Responsive
 
 **Mobile-first.** Base styles target mobile, then scale up with `min-width` media queries.

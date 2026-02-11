@@ -97,6 +97,11 @@
 				<span class="msg wipe-in" class:error={status === 'error'}>{message}</span>
 			{/if}
 		</div>
+		{#if status === 'input' || status === 'loading'}
+			<p class="privacy-note wipe-in">
+				<a href="/privacy">privacy policy</a> · <a href="/unsubscribe">unsubscribe anytime</a>
+			</p>
+		{/if}
 	</div>
 	<div class="border-bottom">└<span class="border-line"></span>┘</div>
 </aside>
@@ -267,5 +272,24 @@
 
 	.msg.error {
 		color: #ff4141;
+	}
+
+	/* Privacy note */
+	.privacy-note {
+		margin: 0.75rem 0 0 0;
+		font-size: 0.75rem;
+		color: var(--matrix-green-dim);
+	}
+
+	.privacy-note a {
+		color: var(--matrix-green-dim);
+		border-bottom-color: transparent;
+		transition: color 0.15s ease, border-color 0.15s ease;
+	}
+
+	.privacy-note a:hover {
+		color: var(--matrix-green);
+		border-bottom-color: var(--matrix-green-dim);
+		text-shadow: none;
 	}
 </style>

@@ -26,6 +26,10 @@
 	<main>
 		{@render children()}
 	</main>
+
+	<footer class="site-footer" class:invisible={duringIntro} class:fade-in={shouldAnimate}>
+		<a href="/privacy">privacy</a>
+	</footer>
 </div>
 
 <style>
@@ -64,5 +68,23 @@
 		display: flex;
 		align-items: center;
 		gap: 1.5rem;
+	}
+
+	.site-footer {
+		margin-top: 4rem;
+		padding: 1rem 0;
+		border-top: 1px solid var(--matrix-gray);
+		text-align: center;
+		font-size: 0.8rem;
+	}
+
+	.site-footer a {
+		color: var(--matrix-green-dim);
+		border-bottom: none;
+	}
+
+	.site-footer a:hover {
+		color: var(--matrix-green);
+		text-shadow: none;
 	}
 </style>

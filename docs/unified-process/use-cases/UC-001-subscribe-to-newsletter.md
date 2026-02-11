@@ -1,10 +1,11 @@
 # UC-001: Subscribe to Newsletter
 
 **Related Vision Goal:** G-004.5 (Email capture)
+**Related Requirements:** REQ-GDPR-001, REQ-GDPR-002
 
 ## Summary
 
-A reader provides their email address to receive future updates from the site.
+A reader provides their email address to receive future updates from the site, with clear consent and awareness of their rights.
 
 ## Actors
 
@@ -17,25 +18,26 @@ A reader provides their email address to receive future updates from the site.
 ## Basic Flow
 
 1. Reader enters their email address into the subscription form
-2. Reader submits the form
-3. System validates the email format
-4. System stores the email with timestamp
-5. System displays confirmation message
+2. System displays links to privacy policy and unsubscribe option
+3. Reader submits the form (consent implied by action)
+4. System validates the email format
+5. System stores the email with timestamp
+6. System displays confirmation message
 
 ## Alternate Flows
 
 ### A1: Invalid Email Format
-At step 3, if the email format is invalid:
+At step 4, if the email format is invalid:
 1. System displays error message indicating invalid email
 2. Reader corrects the email and resubmits
 
 ### A2: Already Subscribed
-At step 4, if the email already exists:
+At step 5, if the email already exists:
 1. System displays message indicating already subscribed
 2. Flow ends (no duplicate entry created)
 
 ### A3: Service Unavailable
-At step 4, if storage is unavailable:
+At step 5, if storage is unavailable:
 1. System displays error message asking to try again later
 2. Flow ends
 
@@ -43,12 +45,21 @@ At step 4, if storage is unavailable:
 
 - Email is stored in the subscriber list (unless already present)
 - Reader sees confirmation of their action
+- Reader was informed of privacy policy and unsubscribe option before submitting
 
 ## UI Notes
 
 - Form should be simple: email input + submit button
+- Privacy policy and unsubscribe links shown when input is active
 - Success state replaces form with confirmation
 - Error state shows inline message without losing input
+
+## GDPR Compliance
+
+- Consent is explicit: reader must actively enter email and click submit
+- Privacy policy link visible before submission
+- Unsubscribe option clearly communicated
+- See UC-002 for unsubscribe flow
 
 ## Data Stored
 

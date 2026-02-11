@@ -183,6 +183,7 @@
 		color: var(--matrix-green);
 		font-family: var(--font-mono);
 		font-size: 1rem;
+		line-height: 1.6;
 		padding: 0;
 		cursor: pointer;
 		transition: text-shadow 0.15s ease, border-color 0.15s ease;
@@ -200,6 +201,7 @@
 
 	.sep {
 		color: var(--matrix-green-dim);
+		line-height: 1.6;
 	}
 
 	/* Input form */

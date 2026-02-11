@@ -163,6 +163,7 @@
 		color: var(--matrix-green-dim);
 		cursor: default;
 		transition: color 0.15s ease, text-shadow 0.15s ease;
+		border-bottom: 1px solid transparent;
 	}
 
 	.nav-subscribe:hover .state-container > span:not(.msg) {
@@ -202,6 +203,7 @@
 	.sep {
 		color: var(--matrix-green-dim);
 		line-height: 1.6;
+		border-bottom: 1px solid transparent;
 	}
 
 	/* Input form */

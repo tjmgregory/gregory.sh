@@ -80,6 +80,7 @@
 		transition: color 0.15s ease, text-shadow 0.15s ease;
 		white-space: nowrap;
 		line-height: 1.6;
+		border-bottom: 1px solid transparent;
 	}
 
 	.nav-contact:hover .label {
@@ -119,5 +120,6 @@
 	.sep {
 		color: var(--matrix-green-dim);
 		line-height: 1.6;
+		border-bottom: 1px solid transparent;
 	}
 </style>

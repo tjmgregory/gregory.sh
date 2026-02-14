@@ -17,10 +17,14 @@
 
 <Seo
 	title={post.title}
+	seoTitle={post.seoTitle}
 	description={post.description}
 	url={`https://gregory.sh/blog/${post.slug}`}
 	type="article"
 	publishedTime={post.date}
+	modifiedTime={post.updated}
+	image={post.ogImage ? `https://gregory.sh${post.ogImage}` : undefined}
+	keywords={post.keywords}
 />
 
 <article>

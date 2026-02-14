@@ -22,7 +22,7 @@ export const GET: RequestHandler = async () => {
 
 	const postEntries: SitemapEntry[] = posts.map((post) => ({
 		loc: `/blog/${post.slug}`,
-		lastmod: post.date,
+		lastmod: post.updated ?? post.date,
 		priority: '0.7',
 		changefreq: 'monthly'
 	}));

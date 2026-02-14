@@ -73,7 +73,7 @@
 	.site-footer {
 		margin-top: 4rem;
 		padding: 1rem 0;
-		border-top: 1px solid var(--matrix-gray);
+		border-top: 1px solid var(--matrix-green-dim);
 		text-align: center;
 		font-size: 0.8rem;
 	}

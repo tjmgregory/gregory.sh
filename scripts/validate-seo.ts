@@ -19,6 +19,11 @@ interface PostFrontmatter {
 	title: string;
 	date: string;
 	description?: string;
+	keywords?: string[];
+	seoTitle?: string;
+	ogImage?: string;
+	updated?: string;
+	slug?: string;
 }
 
 interface ValidationResult {
@@ -106,6 +111,28 @@ function validatePost(file: string, frontmatter: PostFrontmatter, content: strin
 	const ogPath = path.join(process.cwd(), 'static/og', `${slug}.png`);
 	if (!fs.existsSync(ogPath)) {
 		warnings.push(`Missing OG image (run: bun run og:generate)`);
+	}
+
+	// Keywords check
+	if (!frontmatter.keywords || frontmatter.keywords.length === 0) {
+		warnings.push('Missing keywords — add 1-2 keyword phrases for article:tag OG and JSON-LD');
+	}
+
+	// Slug validation
+	if (frontmatter.slug && /[A-Z]/.test(frontmatter.slug)) {
+		warnings.push(`Slug contains uppercase characters: "${frontmatter.slug}"`);
+	}
+	if (frontmatter.slug && /[^a-z0-9-]/.test(frontmatter.slug)) {
+		warnings.push(`Slug contains non-URL-safe characters: "${frontmatter.slug}"`);
+	}
+
+	// Updated date validation
+	if (frontmatter.updated && frontmatter.date) {
+		const updated = new Date(frontmatter.updated);
+		const published = new Date(frontmatter.date);
+		if (updated < published) {
+			warnings.push(`Updated date (${frontmatter.updated}) is before publication date (${frontmatter.date})`);
+		}
 	}
 
 	return { file, errors, warnings };

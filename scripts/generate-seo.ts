@@ -21,6 +21,11 @@ interface PostFrontmatter {
 	title: string;
 	date: string;
 	description?: string;
+	keywords?: string[];
+	seoTitle?: string;
+	ogImage?: string;
+	updated?: string;
+	slug?: string;
 }
 
 interface Post {

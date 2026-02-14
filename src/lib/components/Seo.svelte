@@ -1,12 +1,14 @@
 <script lang="ts">
 	interface Props {
 		title?: string;
+		seoTitle?: string;
 		description?: string;
 		url?: string;
 		image?: string;
 		type?: 'website' | 'article';
 		publishedTime?: string;
 		modifiedTime?: string;
+		keywords?: string[];
 	}
 
 	const site = 'https://gregory.sh';
@@ -28,18 +30,21 @@
 
 	let {
 		title,
+		seoTitle,
 		description = defaultDescription,
 		url = site,
 		image = `${site}/og-image.png`,
 		type = 'website',
 		publishedTime,
-		modifiedTime
+		modifiedTime,
+		keywords
 	}: Props = $props();
 
 	// Homepage gets tagline, other pages get "Page | Name"
 	const isHomepage = $derived(url === site || url === `${site}/`);
+	const searchTitle = $derived(seoTitle ?? title);
 	const fullTitle = $derived(
-		title ? `${title} | ${author.name}` : `${author.name} — ${tagline}`
+		searchTitle ? `${searchTitle} | ${author.name}` : `${author.name} — ${tagline}`
 	);
 
 	// JSON-LD structured data
@@ -55,6 +60,8 @@
 				url: url,
 				datePublished: publishedTime,
 				dateModified: modifiedTime ?? publishedTime,
+				...(keywords?.length && { keywords: keywords.join(', ') }),
+				articleSection: 'Technology',
 				author: {
 					'@type': 'Person',
 					name: author.name,
@@ -126,6 +133,11 @@
 	{/if}
 	{#if modifiedTime}
 		<meta property="article:modified_time" content={modifiedTime} />
+	{/if}
+	{#if keywords}
+		{#each keywords as keyword}
+			<meta property="article:tag" content={keyword} />
+		{/each}
 	{/if}
 
 	<!-- Twitter Card -->

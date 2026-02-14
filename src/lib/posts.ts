@@ -6,6 +6,10 @@ export interface Post {
 	date: string;
 	description: string;
 	content: Component;
+	keywords?: string[];
+	seoTitle?: string;
+	ogImage?: string;
+	updated?: string;
 }
 
 export interface PostMetadata {
@@ -13,6 +17,10 @@ export interface PostMetadata {
 	title: string;
 	date: string;
 	description: string;
+	keywords?: string[];
+	seoTitle?: string;
+	ogImage?: string;
+	updated?: string;
 }
 
 interface PostModule {
@@ -28,7 +36,10 @@ const postMap = new Map<string, Post>();
 
 for (const path in modules) {
 	const module = modules[path];
-	const slug = path.split('/').pop()?.replace('.md', '') ?? '';
+	const filenameSlug =
+		path.split('/').pop()?.replace('.md', '').replace(/^\d{4}-\d{2}-\d{2}-/, '') ?? '';
+	const slug =
+		((module.metadata as Record<string, unknown>).slug as string) || filenameSlug;
 
 	if (module.metadata) {
 		postMap.set(slug, {
@@ -36,18 +47,28 @@ for (const path in modules) {
 			content: module.default,
 			title: module.metadata.title,
 			date: module.metadata.date,
-			description: module.metadata.description
+			description: module.metadata.description,
+			keywords: module.metadata.keywords,
+			seoTitle: module.metadata.seoTitle,
+			ogImage: module.metadata.ogImage,
+			updated: module.metadata.updated
 		});
 	}
 }
 
 export function getPosts(): PostMetadata[] {
-	const posts = Array.from(postMap.values()).map(({ slug, title, date, description }) => ({
-		slug,
-		title,
-		date,
-		description
-	}));
+	const posts = Array.from(postMap.values()).map(
+		({ slug, title, date, description, keywords, seoTitle, ogImage, updated }) => ({
+			slug,
+			title,
+			date,
+			description,
+			keywords,
+			seoTitle,
+			ogImage,
+			updated
+		})
+	);
 
 	// Sort by date, newest first
 	return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

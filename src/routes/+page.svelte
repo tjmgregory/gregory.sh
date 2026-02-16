@@ -19,9 +19,28 @@
 	let showCursor = $state(true);
 	let isTyping = $state(false);
 	let introStarted = $state(false);
+	let skipped = false;
 
 	function sleep(ms: number): Promise<void> {
-		return new Promise((resolve) => setTimeout(resolve, ms));
+		return new Promise((resolve) => {
+			if (skipped) return resolve();
+			setTimeout(resolve, ms);
+		});
+	}
+
+	function skipIntro(): void {
+		if (!isTyping) return;
+		skipped = true;
+		typedText = WELCOME_TEXT;
+		isTyping = false;
+		shouldAnimateFadeIn.set(true);
+		introComplete.set(true);
+	}
+
+	function handleKeydown(e: KeyboardEvent): void {
+		if (e.key === 'Escape' && isTyping) {
+			skipIntro();
+		}
 	}
 
 	async function runIntro(): Promise<void> {
@@ -34,6 +53,7 @@
 
 		// Phase 2: Type out the welcome message
 		for (let i = 0; i <= WELCOME_TEXT.length; i++) {
+			if (skipped) return;
 			typedText = WELCOME_TEXT.slice(0, i);
 			const justTyped = WELCOME_TEXT[i - 1];
 			const nextChar = WELCOME_TEXT[i];
@@ -50,8 +70,12 @@
 			}
 		}
 
+		if (skipped) return;
+
 		// Phase 3: Short pause
 		await sleep(POST_TYPING_DELAY);
+
+		if (skipped) return;
 
 		// Phase 4: Complete intro - trigger fade in
 		isTyping = false;
@@ -74,6 +98,8 @@
 		}
 	});
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <Seo url="https://gregory.sh" />
 

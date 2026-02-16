@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted
+Superseded — SEO validation moved to the-newsroom pipeline (validate-blog-seo.sh).
+OG image generation (generate-og-images.ts) remains in gregory.sh.
 
 ## Context
 

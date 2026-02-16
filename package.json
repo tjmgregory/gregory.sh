@@ -13,9 +13,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
 		"test:run": "vitest run",
-		"seo:generate": "bun run scripts/generate-seo.ts",
 		"og:generate": "bun run scripts/generate-og-images.ts",
-		"seo:validate": "bun run scripts/validate-seo.ts",
 		"publish": "bun run scripts/publish.ts"
 	},
 	"devDependencies": {
@@ -30,7 +28,6 @@
 		"gray-matter": "^4.0.3",
 		"jsdom": "^28.0.0",
 		"mdsvex": "^0.12.6",
-		"openai": "^6.18.0",
 		"satori": "^0.19.1",
 		"svelte": "^5.50.0",
 		"svelte-check": "^4.3.6",

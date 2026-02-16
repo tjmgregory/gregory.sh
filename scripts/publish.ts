@@ -1,9 +1,12 @@
 /**
  * Publish a blog post from the-newsroom draft to gregory.sh
  *
- * Takes a newsroom draft-blog.md file, validates its frontmatter,
- * transforms it to gregory.sh's content format, and places it
- * in content/posts/ ready for deployment.
+ * Takes a newsroom draft-blog.md file, validates its frontmatter shape,
+ * and places it in content/posts/ ready for deployment.
+ *
+ * SEO quality is enforced upstream by the-newsroom's review pipeline
+ * (scripts/validate-blog-seo.sh). This script only checks that required
+ * fields are present and the file can be written.
  *
  * Usage:
  *   bun run publish <path-to-draft-blog.md>
@@ -60,6 +63,10 @@ function fail(msg: string): never {
 	process.exit(1);
 }
 
+/**
+ * Validates that required frontmatter fields are present and parseable.
+ * Does NOT check SEO quality — that's the newsroom's job.
+ */
 function validate(data: DraftFrontmatter, content: string): ValidatedFrontmatter {
 	const errors: string[] = [];
 
@@ -69,23 +76,6 @@ function validate(data: DraftFrontmatter, content: string): ValidatedFrontmatter
 	if (!data.slug?.trim()) errors.push('missing "slug"');
 	if (!data.keywords?.length) errors.push('missing "keywords" (need at least one)');
 	if (!content.trim()) errors.push('draft body is empty');
-
-	// Validate field quality
-	if (data.title && data.title.length > 70) {
-		errors.push(`title too long (${data.title.length} chars, max 70)`);
-	}
-	if (data.description && data.description.length > 160) {
-		errors.push(`description too long (${data.description.length} chars, max 160)`);
-	}
-	if (data.description && data.description.length < 50) {
-		errors.push(`description too short (${data.description.length} chars, min 50)`);
-	}
-	if (data.slug && /[A-Z]/.test(data.slug)) {
-		errors.push(`slug contains uppercase characters: "${data.slug}"`);
-	}
-	if (data.slug && /[^a-z0-9-]/.test(data.slug)) {
-		errors.push(`slug contains non-URL-safe characters: "${data.slug}"`);
-	}
 
 	// Validate date parses
 	if (data.date) {
@@ -105,7 +95,7 @@ function validate(data: DraftFrontmatter, content: string): ValidatedFrontmatter
 ---
 title: "Post Title"
 date: 2026-02-21T12:00:00+01:00
-description: "SEO meta description (120-160 chars)"
+description: "SEO meta description"
 slug: "post-slug"
 keywords:
   - "primary keyword"
@@ -227,7 +217,6 @@ function main() {
 
 	// Suggest next steps
 	console.log('\nNext steps:');
-	console.log(`  bun run seo:validate          # Check SEO compliance`);
 	console.log(`  bun run og:generate            # Generate OG image`);
 	console.log(`  bun run build                  # Verify build succeeds`);
 }

@@ -67,11 +67,8 @@ function parsePost(slug: string): Post {
 	const { data, content } = matter(raw);
 
 	const title = data.title as string;
-	const date = new Date(data.date as string).toLocaleDateString("en-GB", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
+	const d = new Date(data.date as string);
+	const date = d.toISOString().slice(0, 10);
 
 	// Take the first 2-3 paragraphs (non-empty lines separated by blank lines)
 	const paragraphs = content

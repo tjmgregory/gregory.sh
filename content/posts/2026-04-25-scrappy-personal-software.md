@@ -47,6 +47,6 @@ This — the very exact, personal problem solved with a fork and a few hours —
 
 That's a Savile Row tailor. That's a luthier who builds a guitar for one player's hands. That's a concierge GP who knows your bloodwork by heart. One craftsperson, a handful of people, a finished thing that fits absolutely no one else.
 
-I wrote a few weeks ago about ripping up [the first version of Inc](/blog/inc-first-rewrite) and starting again with terrifying specificity. That post named the era. This week is what the era looks like on a Tuesday afternoon — me, a fork of someone else's hard work, an MCP server, a backup script, and a folder full of conversations about Spain.
+I wrote a few weeks ago about ripping up [the first version of Inc](/blog/inc-first-rewrite) and starting again. That post named the era. This week is what the era looks like on a Tuesday afternoon — me, a fork of someone else's hard work, an MCP server, a backup script, and a folder full of conversations about Spain.
 
 > No generifying. Just enough to work for me. It's a really fun way to move.

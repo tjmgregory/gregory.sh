@@ -31,7 +31,7 @@ The agent-made changes I cobbled in have introduced a bug or two. I know what th
 
 > Best case: you fix it next time you're in the codebase. Worst case: you mutter at your laptop for ten seconds and carry on.
 
-This morning's job was backups. iCloud Drive will quietly evict files when storage gets tight, which would be a tragedy for a folder of meeting recordings I might want to query in six months. So I wired in restic + Cloudflare R2, with the secrets sitting safely in 1Password. Took an hour. Saw the gap, filled the gap, no committee.
+This morning's job was backups. Up til now the only copy of all my meeting was on my laptop. So I wired in restic + Cloudflare R2, with the secrets sitting safely in 1Password. Took an hour. Saw the gap, filled the gap, no committee. All with the same tools shared by the rest of my projects.
 
 ## The Spain visa moment
 

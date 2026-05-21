@@ -1,5 +1,5 @@
 <script lang="ts">
-	const lastUpdated = '11 February 2026';
+	const lastUpdated = '21 May 2026';
 
 	// Email encoded to prevent scraping (same as NavContact)
 	const encodedEmail = 'c2l0ZUBncmVnb3J5LnNo';
@@ -34,7 +34,21 @@
 			<li>Your email address</li>
 			<li>The date you subscribed</li>
 		</ul>
-		<p>That's it. No tracking cookies, no analytics, no third-party scripts.</p>
+		<p>
+			I also run <strong>basic, privacy-friendly analytics</strong> to see which posts
+			people read. The analytics tool is <a href="https://umami.is">Umami</a>, which I
+			self-host at <code>analytics.crafts.software</code>. For each page you visit it
+			records:
+		</p>
+		<ul>
+			<li>The page URL and the referring URL</li>
+			<li>Your browser, operating system and device type</li>
+			<li>Country of origin (derived from your IP, which is not stored)</li>
+		</ul>
+		<p>
+			It does not use cookies, does not store your IP address, and does not track you
+			across other websites. The data cannot be linked back to you as a person.
+		</p>
 	</section>
 
 	<section>
@@ -43,6 +57,10 @@
 			I use your email address solely to send you updates about new posts and projects.
 			I won't share it with anyone else or use it for any other purpose.
 		</p>
+		<p>
+			I use the analytics data to understand which posts are landing and to make the
+			site better. Aggregate only — no individual profiles.
+		</p>
 	</section>
 
 	<section>
@@ -50,6 +68,10 @@
 		<p>
 			Your email is stored securely on Cloudflare's infrastructure (Cloudflare KV).
 			It's not shared with any third parties.
+		</p>
+		<p>
+			Analytics data is stored on my own server at <code>analytics.crafts.software</code>.
+			It is not shared with any third parties.
 		</p>
 	</section>
 
@@ -69,6 +91,12 @@
 		<p>
 			I process your email based on your <strong>consent</strong>, which you give when you subscribe.
 			You can withdraw consent at any time by unsubscribing.
+		</p>
+		<p>
+			For analytics, the legal basis is my <strong>legitimate interest</strong> in
+			understanding which posts people read. Because the analytics do not use cookies
+			and do not process personal data, no consent is required and no cookie banner
+			is shown.
 		</p>
 	</section>
 

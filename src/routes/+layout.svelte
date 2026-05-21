@@ -2,6 +2,7 @@
 	import '../app.css';
 	import { NavSubscribe, NavContact, introComplete, shouldAnimateFadeIn } from '$lib';
 	import { page } from '$app/stores';
+	import { dev } from '$app/environment';
 
 	let { children } = $props();
 
@@ -10,6 +11,17 @@
 	let duringIntro = $derived(isHomepage && !$introComplete);
 	let shouldAnimate = $derived(isHomepage && $shouldAnimateFadeIn && $introComplete);
 </script>
+
+<svelte:head>
+	{#if !dev}
+		<script
+			defer
+			src="https://analytics.crafts.software/script.js"
+			data-website-id="8ebc83d4-d185-40cf-9bc0-9d22b98135b8"
+			data-domains="gregory.sh"
+		></script>
+	{/if}
+</svelte:head>
 
 <div class="container">
 	<header class="site-header" class:invisible={duringIntro} class:fade-in={shouldAnimate}>

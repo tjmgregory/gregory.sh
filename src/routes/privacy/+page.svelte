@@ -1,5 +1,5 @@
 <script lang="ts">
-	const lastUpdated = '11 February 2026';
+	const lastUpdated = '21 May 2026';
 
 	// Email encoded to prevent scraping (same as NavContact)
 	const encodedEmail = 'c2l0ZUBncmVnb3J5LnNo';
@@ -29,27 +29,28 @@
 
 	<section>
 		<h2>What data I collect</h2>
-		<p>If you subscribe to my mailing list, I store:</p>
-		<ul>
-			<li>Your email address</li>
-			<li>The date you subscribed</li>
-		</ul>
-		<p>That's it. No tracking cookies, no analytics, no third-party scripts.</p>
+		<p>If you subscribe to my mailing list, I store your email address and the date you subscribed.</p>
+		<p>
+			I also run <a href="https://umami.is">Umami</a>, a self-hosted analytics tool, to
+			see which posts people read. It collects page views, referrer URLs, browsers,
+			operating systems, device types and country of origin. It does not use cookies,
+			does not store IP addresses and does not track you across other websites.
+		</p>
 	</section>
 
 	<section>
 		<h2>Why I collect it</h2>
 		<p>
-			I use your email address solely to send you updates about new posts and projects.
-			I won't share it with anyone else or use it for any other purpose.
+			I use your email solely to send you updates about new posts and projects.
+			I use the analytics data, in aggregate, to understand which posts are landing.
 		</p>
 	</section>
 
 	<section>
 		<h2>How I store it</h2>
 		<p>
-			Your email is stored securely on Cloudflare's infrastructure (Cloudflare KV).
-			It's not shared with any third parties.
+			Your email is stored in Cloudflare KV. Analytics data is stored on a server I
+			run in Germany (EEA). Neither is shared with third parties.
 		</p>
 	</section>
 
@@ -69,6 +70,11 @@
 		<p>
 			I process your email based on your <strong>consent</strong>, which you give when you subscribe.
 			You can withdraw consent at any time by unsubscribing.
+		</p>
+		<p>
+			For analytics, the legal basis is my <strong>legitimate interest</strong> in
+			understanding which posts people read. The analytics do not use cookies or
+			process personal data, so no consent is required.
 		</p>
 	</section>
 

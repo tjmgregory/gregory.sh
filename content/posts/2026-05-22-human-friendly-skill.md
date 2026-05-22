@@ -1,10 +1,10 @@
 ---
 title: Just Let Me Edit the Plan
-date: '2026-05-21T12:00:00+01:00'
+date: '2026-05-22T12:00:00+01:00'
 description: >-
   After a few hours of reading agent plans in markdown, you stop reading them. A
   small Claude Code skill for the rest of the problem.
-slug: editable-plans-claude-code
+slug: human-friendly-skill
 keywords:
   - Claude Code skill
   - editable agent plans

@@ -3,12 +3,12 @@ title: Just Let Me Edit the Plan
 date: '2026-05-22T12:00:00+01:00'
 description: >-
   After a few hours of reading agent plans in markdown, you stop reading them. A
-  small Claude Code skill for the rest of the problem.
+  small agent skill for the rest of the problem.
 slug: human-friendly-skill
 keywords:
-  - Claude Code skill
+  - agent skill
   - editable agent plans
-seoTitle: 'Editable Plans: A Small Claude Code Skill'
+seoTitle: 'Editable Plans: A Small Agent Skill'
 ---
 
 Hands up. Who reads every word your agent burns a hole in the ozone to write? Same.
@@ -29,9 +29,9 @@ You can read the HTML. You can't *type* in it. So the moment I wanted to nudge a
 
 I edit markdown comfortably day-to-day. So even if I got editing inside the HTML doc, the "prettier surface" framing only half-landed for solo use — pretty wasn't really what was missing. What was missing was that any plan I wanted to share with someone else hit a wall the moment they didn't have my toolchain.
 
-## A small Claude Code skill
+## A small agent skill
 
-So I made `/human-friendly`. Plans still come out as a single HTML file, but the file is *editable*. Click any heading, bullet, or table cell and start typing. `#` at the start of a line makes a heading. `-` makes a list. ⌘S saves it back to disk. ⌘Z undoes. Hover a table and little + buttons appear for adding a row or column — they vanish on save, so the file stays clean. It feels like a doc because it behaves like one.
+So I made [`/human-friendly`](#install). Plans still come out as a single HTML file, but the file is *editable*. Click any heading, bullet, or table cell and start typing. `#` at the start of a line makes a heading. `-` makes a list. ⌘S saves it back to disk. ⌘Z undoes. Hover a table and little + buttons appear for adding a row or column — they vanish on save, so the file stays clean. It feels like a doc because it behaves like one.
 
 The unexpected lift was the second pain. Because the whole experience is baked into the single HTML file, I can drop it in a Slack DM or attach it to an email, and the person on the other end opens it in their browser and *edits it the same way I do*. No install, no account, no special tool. They redline, save, send it back.
 
@@ -39,6 +39,23 @@ The unexpected lift was the second pain. Because the whole experience is baked i
 
 This is the same move as [the last post](/blog/scrappy-personal-software). Someone good publishes a recipe, I try it, find the corners that don't fit my hand, and file them down. Thariq nailed the diagnosis and most of the prescription. The bits missing — at least for me — were the smallest, most obvious ones: let me edit the doc you spent all that effort making readable, and let me hand it to someone else who can do the same.
 
-Early days. This very post got dumped into chat the old way — *small embarrassment I'm choosing to leave in*.
+## Install
 
-> Install: `npx skills add tjmgregory/.dotfiles --skill human-friendly`. Or, if you're already in Claude Code: `/plugin marketplace add tjmgregory/.dotfiles` then `/plugin install human-friendly@tjmgregory`. Next plan lands on your Desktop and opens in your browser. Take it from there.
+It's an [agent skill](https://agentskills.io). Pick where you want it:
+
+- [Claude](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) (claude.ai web/desktop)
+- [Claude Code](https://code.claude.com/docs/en/skills) (CLI)
+- [Cursor](https://cursor.com/docs/context/skills) (editor)
+- [Codex](https://developers.openai.com/codex/skills/) (OpenAI's coding agent)
+- [Gemini CLI](https://geminicli.com/docs/cli/skills/)
+- [OpenCode](https://opencode.ai/docs/skills/)
+- Anything else — the universal install: `npx skills add tjmgregory/.dotfiles --skill human-friendly`
+
+In Claude Code you can also use the plugin marketplace:
+
+```
+/plugin marketplace add tjmgregory/.dotfiles
+/plugin install human-friendly@tjmgregory
+```
+
+Next plan lands on your Desktop, ready to edit.

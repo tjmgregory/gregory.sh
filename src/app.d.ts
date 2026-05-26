@@ -11,7 +11,7 @@ declare global {
 
 	interface Window {
 		umami?: {
-			track: (eventName: string, eventData?: Record<string, unknown>) => void;
+			track: (event: string, data?: Record<string, unknown>) => void;
 		};
 	}
 }

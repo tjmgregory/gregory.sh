@@ -31,7 +31,7 @@
 				body: JSON.stringify({ email })
 			});
 
-			const data = (await res.json()) as { error?: string; message?: string; created?: boolean };
+			const data = (await res.json()) as { error?: string; message?: string };
 
 			if (!res.ok) {
 				status = 'error';
@@ -43,9 +43,9 @@
 				return;
 			}
 
-			if (data.created) {
-				window.umami?.track('newsletter_subscribe', { from: window.location.pathname });
-			}
+			// Fire on every successful submit. Same trade-off as NavSubscribe: the
+			// server cannot signal "new vs duplicate" without leaking membership.
+			window.umami?.track('newsletter_subscribe');
 
 			status = 'success';
 			message = 'subscribed!';

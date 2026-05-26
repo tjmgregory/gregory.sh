@@ -16,14 +16,14 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		return json({ error: 'Service unavailable' }, { status: 503 });
 	}
 
+	// Same response shape for new and existing emails so the endpoint cannot be
+	// used to enumerate subscriber membership.
 	const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);
-	if (existing) {
-		return json({ created: false, message: 'Already subscribed' });
+	if (!existing) {
+		await platform.env.SUBSCRIBERS.put(normalizedEmail, JSON.stringify({
+			subscribedAt: new Date().toISOString()
+		}));
 	}
 
-	await platform.env.SUBSCRIBERS.put(normalizedEmail, JSON.stringify({
-		subscribedAt: new Date().toISOString()
-	}));
-
-	return json({ created: true, message: 'Subscribed successfully' });
+	return json({ message: 'Subscribed successfully' });
 };

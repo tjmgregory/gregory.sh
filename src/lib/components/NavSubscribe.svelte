@@ -59,7 +59,7 @@
 				body: JSON.stringify({ email })
 			});
 
-			const data = (await res.json()) as { error?: string; message?: string; created?: boolean };
+			const data = (await res.json()) as { error?: string; message?: string };
 
 			if (!res.ok) {
 				status = 'error';
@@ -71,9 +71,11 @@
 				return;
 			}
 
-			if (data.created) {
-				window.umami?.track('newsletter_subscribe', { from: window.location.pathname });
-			}
+			// Fire on every successful submit (not just new emails). The server cannot
+			// tell us "new vs duplicate" without leaking subscriber membership, so we
+			// accept a small amount of dilution from repeat submits in exchange for
+			// not exposing an enumeration oracle.
+			window.umami?.track('newsletter_subscribe');
 
 			status = 'success';
 			message = 'subscribed';

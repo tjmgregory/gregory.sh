@@ -99,14 +99,14 @@ bun run dev:port 5180 &
 
 ## Issue Tracking
 
-**Use beads to find work.** Run `bd ready` to see unblocked tasks.
+**Use Linear to find work.** Use the `linear-cli` skill (the `linear` binary on PATH).
 
 ```bash
-bd ready                              # Find work with no blockers
-bd list                               # See all issues
-bd show <id>                          # Issue details
-bd update <id> --status in_progress   # Claim work
-bd close <id>                         # Mark done
+linear issue mine                            # Issues assigned to me
+linear issue list --team <key>               # See all issues for a team
+linear issue view <id>                       # Issue details
+linear issue update <id> --status "In Progress"  # Claim work
+linear issue update <id> --status "Done"     # Mark done
 ```
 
 ## Unified Process
@@ -162,13 +162,12 @@ function handleEmailClick() {
 
 **MANDATORY WORKFLOW:**
 
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
+1. **File issues for remaining work** - Create Linear issues for anything that needs follow-up (`linear issue create`)
 2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
+3. **Update issue status** - Close finished work, update in-progress items (`linear issue update <id> --status …`)
 4. **PUSH TO REMOTE** - This is MANDATORY:
    ```bash
    git pull --rebase
-   bd sync
    git push
    git status  # MUST show "up to date with origin"
    ```

@@ -44,6 +44,10 @@
 				return;
 			}
 
+			// Fire on every successful submit. Same trade-off as subscribe: the server
+			// cannot signal "real removal vs unknown email" without leaking membership.
+			window.umami?.track('newsletter_unsubscribe');
+
 			status = 'success';
 			message = data.message ?? 'Unsubscribed';
 		} catch {

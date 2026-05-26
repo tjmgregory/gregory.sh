@@ -22,6 +22,10 @@
 				return;
 			}
 
+			// Fire on every successful submit. Same trade-off as NavSubscribe: the
+			// server cannot signal "new vs duplicate" without leaking membership.
+			window.umami?.track('newsletter_subscribe');
+
 			status = 'success';
 			message = data.message ?? 'Subscribed!';
 			email = '';

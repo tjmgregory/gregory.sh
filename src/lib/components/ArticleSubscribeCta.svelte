@@ -31,7 +31,7 @@
 				body: JSON.stringify({ email })
 			});
 
-			const data = (await res.json()) as { error?: string; message?: string };
+			const data = (await res.json()) as { error?: string; message?: string; created?: boolean };
 
 			if (!res.ok) {
 				status = 'error';
@@ -41,6 +41,10 @@
 					message = '';
 				}, 2000);
 				return;
+			}
+
+			if (data.created) {
+				window.umami?.track('newsletter_subscribe', { from: window.location.pathname });
 			}
 
 			status = 'success';

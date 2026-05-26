@@ -18,12 +18,12 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);
 	if (existing) {
-		return json({ message: 'Already subscribed' });
+		return json({ created: false, message: 'Already subscribed' });
 	}
 
 	await platform.env.SUBSCRIBERS.put(normalizedEmail, JSON.stringify({
 		subscribedAt: new Date().toISOString()
 	}));
 
-	return json({ message: 'Subscribed successfully' });
+	return json({ created: true, message: 'Subscribed successfully' });
 };

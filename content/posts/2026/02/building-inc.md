@@ -2,6 +2,7 @@
 title: Why I'm Building a Company Made of Agents
 date: 2026-02-09T17:30:00+01:00
 description: I'm building Inc—a system to run twelve businesses with agents instead of employees.
+slug: building-inc
 ---
 
 Software is getting cheap. Not just cheaper—the cost curve is collapsing in a way that changes what's possible for a single person to do.

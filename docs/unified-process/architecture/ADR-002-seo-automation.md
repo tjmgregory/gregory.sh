@@ -41,7 +41,7 @@ Key constraints:
 ┌─────────────────────────────────────────────────────────────┐
 │                    Content Layer                             │
 ├─────────────────────────────────────────────────────────────┤
-│  content/posts/*.md       │  static/og/*.png                │
+│  content/posts/**/*.md    │  static/og/*.png                │
 │  (frontmatter updated)    │  (generated images)             │
 └─────────────────────────────────────────────────────────────┘
                               │

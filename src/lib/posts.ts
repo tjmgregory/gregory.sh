@@ -28,16 +28,16 @@ interface PostModule {
 	metadata: Omit<PostMetadata, 'slug'>;
 }
 
-// Eager load all posts at build time
-const modules = import.meta.glob<PostModule>('/content/posts/*.md', { eager: true });
+// Eager load all posts at build time. Posts are filed as
+// content/posts/<year>/<month>/<slug>.md, so the glob walks subdirectories.
+const modules = import.meta.glob<PostModule>('/content/posts/**/*.md', { eager: true });
 
 // Build a map of slug -> post for quick lookup
 const postMap = new Map<string, Post>();
 
 for (const path in modules) {
 	const module = modules[path];
-	const filenameSlug =
-		path.split('/').pop()?.replace('.md', '').replace(/^\d{4}-\d{2}-\d{2}-/, '') ?? '';
+	const filenameSlug = path.split('/').pop()?.replace(/\.md$/, '') ?? '';
 	const slug =
 		((module.metadata as Record<string, unknown>).slug as string) || filenameSlug;
 

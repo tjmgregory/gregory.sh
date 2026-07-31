@@ -23,6 +23,7 @@ interface PostFrontmatter {
 	title: string;
 	date: string;
 	description?: string;
+	slug?: string;
 	ogImage?: string;
 }
 
@@ -38,8 +39,20 @@ function parseArgs(): Args {
 	};
 }
 
-function fileToSlug(file: string): string {
-	return file.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '');
+// Posts are filed as content/posts/<year>/<month>/<slug>.md, so walk subdirectories.
+function findPosts(dir: string): string[] {
+	const found: string[] = [];
+
+	for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+		const full = path.join(dir, entry.name);
+		if (entry.isDirectory()) {
+			found.push(...findPosts(full));
+		} else if (entry.name.endsWith('.md')) {
+			found.push(full);
+		}
+	}
+
+	return found.sort();
 }
 
 // Load a font for satori (using Inter from Google Fonts CDN)
@@ -162,20 +175,20 @@ async function main() {
 	console.log('Loading font...');
 	const fontData = await loadFont();
 
-	const files = fs.readdirSync(POSTS_DIR).filter((f: string) => f.endsWith('.md'));
+	const files = findPosts(POSTS_DIR);
 	console.log(`Found ${files.length} post(s)\n`);
 
 	let generated = 0;
 	let skipped = 0;
 
-	for (const file of files) {
-		const slug = fileToSlug(file);
-		const outputPath = path.join(OG_OUTPUT_DIR, `${slug}.png`);
-
-		const filepath = path.join(POSTS_DIR, file);
+	for (const filepath of files) {
 		const raw = fs.readFileSync(filepath, 'utf-8');
 		const { data } = matter(raw);
 		const frontmatter = data as PostFrontmatter;
+
+		// The slug comes from frontmatter, same as the site does it.
+		const slug = frontmatter.slug?.trim() || path.basename(filepath, '.md');
+		const outputPath = path.join(OG_OUTPUT_DIR, `${slug}.png`);
 
 		// Skip if image already exists (unless --force)
 		if (fs.existsSync(outputPath) && !args.force) {

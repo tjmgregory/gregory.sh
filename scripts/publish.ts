@@ -2,7 +2,7 @@
  * Publish a blog post from the-newsroom draft to gregory.sh
  *
  * Takes a newsroom draft-blog.md file, validates its frontmatter shape,
- * and places it in content/posts/ ready for deployment.
+ * and files it as content/posts/<year>/<month>/<slug>.md ready for deployment.
  *
  * SEO quality is enforced upstream by the-newsroom's review pipeline
  * (scripts/validate-blog-seo.sh). This script only checks that required
@@ -117,12 +117,32 @@ ogImage: "/og/post-slug.png"
 	};
 }
 
-function buildOutputFilename(date: string, slug: string): string {
+// Posts are filed as content/posts/<year>/<month>/<slug>.md.
+// The returned path is relative to POSTS_DIR.
+function buildOutputPath(date: string, slug: string): string {
 	const d = new Date(date);
-	const yyyy = d.getFullYear();
+	const yyyy = String(d.getFullYear());
 	const mm = String(d.getMonth() + 1).padStart(2, '0');
-	const dd = String(d.getDate()).padStart(2, '0');
-	return `${yyyy}-${mm}-${dd}-${slug}.md`;
+	return path.join(yyyy, mm, `${slug}.md`);
+}
+
+// Walk subdirectories to find every post already published.
+// Returns paths relative to POSTS_DIR.
+function findPosts(dir: string, prefix = ''): string[] {
+	if (!fs.existsSync(dir)) return [];
+
+	const found: string[] = [];
+
+	for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+		const rel = path.join(prefix, entry.name);
+		if (entry.isDirectory()) {
+			found.push(...findPosts(path.join(dir, entry.name), rel));
+		} else if (entry.name.endsWith('.md')) {
+			found.push(rel);
+		}
+	}
+
+	return found.sort();
 }
 
 function buildFrontmatter(meta: ValidatedFrontmatter): Record<string, unknown> {
@@ -165,17 +185,19 @@ function main() {
 		meta.date = rawDateMatch[1];
 	}
 
-	const filename = buildOutputFilename(meta.date, meta.slug);
-	const outputPath = path.join(POSTS_DIR, filename);
+	const relativePath = buildOutputPath(meta.date, meta.slug);
+	const outputPath = path.join(POSTS_DIR, relativePath);
 
 	// Check for existing post with same slug
 	if (fs.existsSync(outputPath)) {
 		fail(`post already exists: ${outputPath}\nDelete or rename the existing file to republish.`);
 	}
 
-	// Also check for any file with the same slug but different date
-	const existingFiles = fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith('.md'));
-	const conflicting = existingFiles.find((f) => f.endsWith(`-${meta.slug}.md`) && f !== filename);
+	// Also check for any file with the same slug filed under a different month
+	const existingFiles = findPosts(POSTS_DIR);
+	const conflicting = existingFiles.find(
+		(f) => path.basename(f, '.md') === meta.slug && f !== relativePath
+	);
 	if (conflicting) {
 		fail(
 			`a post with slug "${meta.slug}" already exists as ${conflicting}\nDelete or rename the existing file to republish.`
@@ -194,7 +216,7 @@ function main() {
 	console.log(`  Keywords:    ${meta.keywords.join(', ')}`);
 	if (meta.seoTitle) console.log(`  SEO Title:   ${meta.seoTitle}`);
 	if (meta.ogImage) console.log(`  OG Image:    ${meta.ogImage}`);
-	console.log(`  File:        ${filename}`);
+	console.log(`  File:        ${relativePath}`);
 	console.log(`  Dest:        ${outputPath}`);
 	console.log(`  Body:        ${content.trim().split('\n').length} lines\n`);
 
@@ -208,8 +230,8 @@ function main() {
 		return;
 	}
 
-	// Ensure posts directory exists
-	fs.mkdirSync(POSTS_DIR, { recursive: true });
+	// Ensure the year/month directory exists
+	fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
 	// Write the post
 	fs.writeFileSync(outputPath, output, 'utf-8');

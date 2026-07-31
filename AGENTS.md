@@ -24,24 +24,29 @@ src/
   lib/
     posts.ts              # Post loading utilities
 content/
-  posts/                  # Markdown blog posts
+  posts/<year>/<month>/   # Markdown blog posts, filed by year and month
 docs/
   unified-process/        # UP artefacts
 ```
 
 ## Content
 
-Blog posts live in `content/posts/` as markdown files with frontmatter:
+Blog posts live in `content/posts/<year>/<month>/<slug>.md`, so a post dated 9 Feb 2026
+sits at `content/posts/2026/02/building-inc.md`. Each file has frontmatter:
 
 ```md
 ---
 title: Post Title
 date: 2026-02-09
 description: Brief description for SEO
+slug: post-slug
 ---
 
 Content here...
 ```
+
+The public URL is `/blog/<slug>`. The slug comes from frontmatter, not the filename or
+the folder, so always set it.
 
 ## Commands
 

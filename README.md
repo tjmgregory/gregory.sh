@@ -17,17 +17,20 @@ npm run dev
 
 ## Writing
 
-Add posts to `content/posts/`:
+Add posts to `content/posts/<year>/<month>/<slug>.md`:
 
 ```md
 ---
 title: My Post
 date: 2026-02-09
 description: A brief description
+slug: my-post
 ---
 
 Your content here...
 ```
+
+The URL is `/blog/<slug>`, taken from frontmatter.
 
 ## Deployment
 

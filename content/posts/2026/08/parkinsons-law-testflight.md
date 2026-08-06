@@ -35,7 +35,7 @@ Fire tore through my fingers for the next 12 hours toward a goal that was so int
 
 Having just a single event in my calendar gave me complete and total clarity over what was important that day.
 
-I'd been in the middle of important features too like profiles, redesigning [the landing site](https://lanteon.app), data sync fixes and more.
+I'd been in the middle of important features too like profiles, redesigning the landing site, data sync fixes and more.
 
 But the core feature had been built for over a week. If this app is going to eat anymore of my time, it's base functionality has to at least work.
 

@@ -12,7 +12,7 @@ seoTitle: Parkinson's Law and the Beta I Kept Not Shipping
 ---
 Back in July I secretly added the signup page for the Lanteon beta, and then did absolutely nothing with it.
 
-In the subsequent weeks I was then busy in the build:
+In the subsequent weeks I was then busy in the build of:
 - Friend invites
 - Widgets
 - A unified design system
@@ -35,7 +35,7 @@ Fire tore through my fingers for the next 12 hours toward a goal that was so int
 
 Having just a single event in my calendar gave me complete and total clarity over what was important that day.
 
-I'd been in the middle of important features too like profiles, redesigning [the landing site](https://lanteon.app), data sync fixes and more.
+I'd been in the middle of important features too like profiles, redesigning the landing site, data sync fixes and more.
 
 But the core feature had been built for over a week. If this app is going to eat anymore of my time, it's base functionality has to at least work.
 

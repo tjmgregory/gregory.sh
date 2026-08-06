@@ -53,6 +53,6 @@ With iOS now having it's final bugs ironed out, public beta release is planned f
 
 > Tick tock.
 
-If you're wanting **free access for life** and to help build the one thing that, at least for me, could be the one real, *simple* cure to being addicted to your phone, then [join the waitlist](https://lanteon.app/beta) and I'll be with you in no time at all.
+If you're wanting **free access for life** and to help build the one thing that, at least for me, could be the one real, *simple* cure to being addicted to your phone, then [join the waitlist](https://gregory.sh/subscribe) and I'll be with you in no time at all.
 
 Looking forward to having my first app out in the real world - it's been a blast coming this far 🤘

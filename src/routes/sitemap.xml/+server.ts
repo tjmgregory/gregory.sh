@@ -17,7 +17,8 @@ export const GET: RequestHandler = async () => {
 
 	const pages: SitemapEntry[] = [
 		{ loc: '', priority: '1.0', changefreq: 'weekly' },
-		{ loc: '/blog', priority: '0.8', changefreq: 'weekly' }
+		{ loc: '/blog', priority: '0.8', changefreq: 'weekly' },
+		{ loc: '/subscribe', priority: '0.5', changefreq: 'yearly' }
 	];
 
 	const postEntries: SitemapEntry[] = posts.map((post) => ({

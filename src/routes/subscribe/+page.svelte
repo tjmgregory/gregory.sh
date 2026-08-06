@@ -58,9 +58,8 @@
 		</div>
 	{:else}
 		<p>
-			New posts by email. I write about building software with agents, and about the
-			businesses I am building with it. No schedule, no filler, and you can leave whenever
-			you like.
+			Expectant solofounder with vision larger than sense. Follow along to get early
+			access to all that pours out and share in the lessons learned along the way.
 		</p>
 
 		<form onsubmit={handleSubmit}>

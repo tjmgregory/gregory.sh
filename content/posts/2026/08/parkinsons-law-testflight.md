@@ -12,7 +12,7 @@ seoTitle: Parkinson's Law and the Beta I Kept Not Shipping
 ---
 Back in July I secretly added the signup page for the Lanteon beta, and then did absolutely nothing with it.
 
-In the subsequent weeks I was then busy in the build:
+In the subsequent weeks I was then busy in the build of:
 - Friend invites
 - Widgets
 - A unified design system

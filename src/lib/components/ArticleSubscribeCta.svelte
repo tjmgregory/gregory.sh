@@ -1,10 +1,16 @@
 <script lang="ts">
+	import Turnstile from '$lib/components/Turnstile.svelte';
+	import { TURNSTILE_ACTIONS, TURNSTILE_SITE_KEY } from '$lib/turnstile-config';
+
 	type Status = 'idle' | 'input' | 'loading' | 'success' | 'error';
+	type TurnstileHandle = { reset: () => void };
 
 	let status = $state<Status>('idle');
 	let email = $state('');
 	let message = $state('');
-	let inputRef: HTMLInputElement | null = null;
+	let inputRef = $state<HTMLInputElement>();
+	let turnstileToken = $state<string | null>(null);
+	let turnstile = $state<TurnstileHandle>();
 
 	function showEmailInput() {
 		status = 'input';
@@ -28,7 +34,7 @@
 			const res = await fetch('/api/subscribe', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email })
+				body: JSON.stringify({ email, turnstileToken })
 			});
 
 			const data = (await res.json()) as { error?: string; message?: string };
@@ -61,6 +67,8 @@
 				status = 'input';
 				message = '';
 			}, 2000);
+		} finally {
+			turnstile?.reset();
 		}
 	}
 
@@ -92,10 +100,25 @@
 						disabled={status === 'loading'}
 						onkeydown={handleKeydown}
 					/>
-					<button type="submit" disabled={status === 'loading'} aria-label="Submit">
+					<button
+						type="submit"
+						disabled={status === 'loading' || !turnstileToken}
+						aria-label="Submit"
+					>
 						{status === 'loading' ? '..' : '>'}
 					</button>
 					<button type="button" class="close" onclick={reset} aria-label="Cancel">x</button>
+					<Turnstile
+						bind:this={turnstile}
+						siteKey={TURNSTILE_SITE_KEY}
+						action={TURNSTILE_ACTIONS.subscribe}
+						onToken={(token) => (turnstileToken = token)}
+						onError={() => {
+							status = 'error';
+							message = 'check failed';
+						}}
+						class="article-turnstile"
+					/>
 				</form>
 			{:else if status === 'success' || status === 'error'}
 				<span class="msg wipe-in" class:error={status === 'error'}>{message}</span>
@@ -210,9 +233,15 @@
 	/* Input form */
 	.input-form {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: center;
 		gap: 0.4rem;
+	}
+
+	:global(.article-turnstile) {
+		flex-basis: 100%;
+		width: 100%;
 	}
 
 	.input-form input {

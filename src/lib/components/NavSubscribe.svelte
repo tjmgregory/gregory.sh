@@ -1,11 +1,17 @@
 <script lang="ts">
+	import Turnstile from '$lib/components/Turnstile.svelte';
+	import { TURNSTILE_ACTIONS, TURNSTILE_SITE_KEY } from '$lib/turnstile-config';
+
 	type Status = 'idle' | 'expanded' | 'input' | 'loading' | 'success' | 'error';
+	type TurnstileHandle = { reset: () => void };
 
 	let status = $state<Status>('idle');
 	let email = $state('');
 	let message = $state('');
 	let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
-	let inputRef: HTMLInputElement | null = null;
+	let inputRef = $state<HTMLInputElement>();
+	let turnstileToken = $state<string | null>(null);
+	let turnstile = $state<TurnstileHandle>();
 
 	function handleMouseEnter() {
 		if (status === 'idle') {
@@ -56,7 +62,7 @@
 			const res = await fetch('/api/subscribe', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email })
+				body: JSON.stringify({ email, turnstileToken })
 			});
 
 			const data = (await res.json()) as { error?: string; message?: string };
@@ -91,6 +97,8 @@
 				status = 'input';
 				message = '';
 			}, 2000);
+		} finally {
+			turnstile?.reset();
 		}
 	}
 
@@ -129,7 +137,22 @@
 					onblur={handleInputBlur}
 					onkeydown={handleKeydown}
 				/>
-				<button type="submit" disabled={status === 'loading'} aria-label="Submit">
+				<Turnstile
+					bind:this={turnstile}
+					siteKey={TURNSTILE_SITE_KEY}
+					action={TURNSTILE_ACTIONS.subscribe}
+					onToken={(token) => (turnstileToken = token)}
+					onError={() => {
+						status = 'error';
+						message = 'check failed';
+					}}
+					class="nav-turnstile"
+				/>
+				<button
+					type="submit"
+					disabled={status === 'loading' || !turnstileToken}
+					aria-label="Submit"
+				>
 					{status === 'loading' ? '..' : '>'}
 				</button>
 				<button type="button" class="close" onclick={reset} aria-label="Cancel">x</button>
@@ -217,6 +240,14 @@
 		display: flex;
 		align-items: center;
 		gap: 0.4rem;
+	}
+
+	:global(.nav-turnstile) {
+		position: absolute;
+		top: 2rem;
+		right: 0;
+		z-index: 10;
+		width: min(300px, calc(100vw - 2rem));
 	}
 
 	.input-form input {

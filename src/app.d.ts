@@ -5,14 +5,31 @@ declare global {
 			env: {
 				SUBSCRIBERS: KVNamespace;
 				RSS_STATS: KVNamespace;
+				TURNSTILE_SECRET_KEY?: string;
 			};
 		}
 	}
 
 	interface Window {
+		turnstile?: {
+			render: (container: HTMLElement, options: TurnstileOptions) => string;
+			reset: (widgetId: string) => void;
+			remove: (widgetId: string) => void;
+		};
 		umami?: {
 			track: (event: string, data?: Record<string, unknown>) => void;
 		};
+	}
+
+	interface TurnstileOptions {
+		sitekey: string;
+		action: string;
+		theme: 'light' | 'dark' | 'auto';
+		size: 'normal' | 'compact' | 'flexible';
+		appearance: 'always' | 'execute' | 'interaction-only';
+		callback: (token: string) => void;
+		'expired-callback': () => void;
+		'error-callback': () => void;
 	}
 }
 

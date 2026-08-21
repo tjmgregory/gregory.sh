@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Turnstile from '$lib/components/Turnstile.svelte';
+	import { TURNSTILE_ACTIONS, TURNSTILE_SITE_KEY } from '$lib/turnstile-config';
 
 	type Status = 'idle' | 'loading' | 'success' | 'error';
+	type TurnstileHandle = { reset: () => void };
 
 	let status = $state<Status>('idle');
 	let email = $state('');
 	let message = $state('');
+	let turnstileToken = $state<string | null>(null);
+	let turnstile = $state<TurnstileHandle>();
 
 	// Email encoded to prevent scraping (same as NavContact)
 	const encodedContactEmail = 'c2l0ZUBncmVnb3J5LnNo';
@@ -33,7 +38,7 @@
 			const res = await fetch('/api/unsubscribe', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email })
+				body: JSON.stringify({ email, turnstileToken })
 			});
 
 			const data = (await res.json()) as { error?: string; message?: string };
@@ -53,6 +58,8 @@
 		} catch {
 			status = 'error';
 			message = 'Something went wrong';
+		} finally {
+			turnstile?.reset();
 		}
 	}
 </script>
@@ -86,7 +93,17 @@
 				required
 				disabled={status === 'loading'}
 			/>
-			<button type="submit" disabled={status === 'loading'}>
+			<Turnstile
+				bind:this={turnstile}
+				siteKey={TURNSTILE_SITE_KEY}
+				action={TURNSTILE_ACTIONS.unsubscribe}
+				onToken={(token) => (turnstileToken = token)}
+				onError={() => {
+					status = 'error';
+					message = 'Verification could not load. Please try again.';
+				}}
+			/>
+			<button type="submit" disabled={status === 'loading' || !turnstileToken}>
 				{status === 'loading' ? 'Removing...' : 'Unsubscribe'}
 			</button>
 		</form>

@@ -62,7 +62,7 @@ async function generateLinkedInCover(fontData: ArrayBuffer): Promise<Buffer> {
 								textAlign: 'center',
 								lineHeight: 1.4
 							},
-							children: 'Solo dev shipping fast'
+							children: 'solo dev shipping fast'
 						}
 					}
 				]

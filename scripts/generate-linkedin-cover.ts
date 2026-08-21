@@ -62,7 +62,7 @@ async function generateLinkedInCover(fontData: ArrayBuffer): Promise<Buffer> {
 								textAlign: 'center',
 								lineHeight: 1.4
 							},
-							children: 'Building Startups with AI Agents'
+							children: 'solo dev shipping fast'
 						}
 					}
 				]

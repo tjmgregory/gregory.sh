@@ -184,6 +184,12 @@ touches KV. `GET` on the same URL redirects to `/unsubscribe?token=...`, where
 the browser decodes the address out of the token and shows one confirm button.
 The address is never in the served HTML, per Email Protection above.
 
+The mail client posts a form body with no `origin` header, which SvelteKit's
+own CSRF check refuses, and that check cannot be waived for one route. So
+`csrf.trustedOrigins` in `svelte.config.js` turns it off and
+`src/cross-site-forms.ts` runs the same check from `hooks.server.ts`, letting
+through only `/api/unsubscribe` with a token.
+
 ## CSS / Responsive
 
 **Mobile-first.** Base styles target mobile, then scale up with `min-width` media queries.

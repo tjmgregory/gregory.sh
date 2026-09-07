@@ -10,7 +10,11 @@ const config = {
 		})
 	],
 	kit: {
-		adapter: adapter()
+		adapter: adapter(),
+		// A mail client posting the one-click unsubscribe URL sends no origin,
+		// and the built-in check cannot be waived for one route. hooks.server.ts
+		// runs the same check for everything else.
+		csrf: { trustedOrigins: ['*'] }
 	}
 };
 

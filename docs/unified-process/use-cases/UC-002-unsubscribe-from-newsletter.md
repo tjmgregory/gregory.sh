@@ -31,6 +31,18 @@ At step 1, if URL contains `?email=` parameter:
 1. Email field is pre-populated
 2. Flow continues at step 3
 
+### A5: One-Click Link from Email
+The `List-Unsubscribe` header and footer link both point at
+`/api/unsubscribe?token=<token>`, one per newsletter recipient.
+1. A mail client POSTs the URL directly (RFC 8058), or the subscriber clicks
+   the link and lands on a one-line confirm page that form-posts the same URL
+2. System checks the token's shape only (non-empty, safe characters, under
+   512 chars); it does not verify who the token belongs to
+3. System writes a marker (`unsub:<token>`) to storage with a 30-day TTL and
+   shows a one-line confirmation page
+4. The newsroom, the only side holding the verification secret, checks the
+   token and deletes the address on its own next audience sync
+
 ### A2: Invalid Email Format
 At step 4, if the email format is invalid:
 1. System displays error message indicating invalid email
@@ -48,7 +60,10 @@ At step 5, if storage is unavailable:
 
 ## Postconditions
 
-- Email is removed from the subscriber list (if it was present)
+- Typed-address flow: email is removed from the subscriber list immediately
+  (if it was present)
+- One-click link flow: a removal marker is recorded immediately; the address
+  itself is removed when the newsroom's next audience sync checks the token
 - Subscriber sees confirmation of their action
 - No further emails will be sent to this address
 
@@ -70,5 +85,7 @@ At step 5, if storage is unavailable:
 ## Implementation Notes
 
 - Endpoint: POST /api/unsubscribe
-- Deletes key from Cloudflare KV
-- Returns success even if email wasn't found
+- Typed-address path: deletes key from Cloudflare KV, returns success even if
+  email wasn't found
+- One-click token path (`?token=`): writes a marker key, never reads or
+  deletes the address; the newsroom does that on its own sync

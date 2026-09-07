@@ -157,32 +157,20 @@ function handleEmailClick() {
 
 Newsletter emails carry a `List-Unsubscribe` header pointing at
 `https://gregory.sh/api/unsubscribe?token=<token>`. A mail client can POST that
-URL on its own (RFC 8058), so it has to prove where it came from without a form
-or a Turnstile challenge.
+URL on its own (RFC 8058), and the same URL sits in the footer for a person to
+click.
 
-The token is `base64url(email) + "." + base64url(HMAC-SHA256(secret, audience + ":" + email))`.
-The address is lowercased and trimmed before it is encoded and before it is
-signed. The HMAC key is the secret's own characters, not the bytes its hex
-spells out. `src/lib/unsubscribe-token.ts` builds and checks it with Web Crypto.
+The site is a dumb front door. It does not verify the token: it checks the
+shape only (non-empty, at most 512 characters, `[A-Za-z0-9_.-]`), then writes
+`unsub:<token>` to `SUBSCRIBERS` with a 30-day TTL and answers 200 with a
+one-line HTML page. The newsroom, the only sender and the only side holding
+the verification secret, reads that marker on its own audience sync, checks
+the token there, and removes the address.
 
-- `UNSUBSCRIBE_AUDIENCE` in `src/lib/unsubscribe-config.ts` is the audience
-  store name signed into the token. The sender signs the same name.
-- `UNSUBSCRIBE_SECRET` is 32 random bytes as hex, held in 1Password and set on
-  the Pages project. The sender holds the same value, so never rotate one side
-  on its own:
-
-  ```bash
-  bunx wrangler pages secret put UNSUBSCRIBE_SECRET --project-name gregory-sh
-  ```
-
-  With no secret set the token path answers 503, never a silent removal.
-
-`POST /api/unsubscribe?token=...` checks the signature, deletes the KV row and
-answers the same JSON the form path answers. It skips Turnstile, because a mail
-client cannot solve one. A bad or missing signature answers 400 and never
-touches KV. `GET` on the same URL redirects to `/unsubscribe?token=...`, where
-the browser decodes the address out of the token and shows one confirm button.
-The address is never in the served HTML, per Email Protection above.
+`GET /api/unsubscribe?token=...` redirects to `/unsubscribe?token=...` for a
+person who clicked the footer link, so a human confirms first. That page
+form-posts to the same URL a mail client hits, so both paths write the same
+marker and land on the same confirmation page.
 
 The mail client posts a form body with no `origin` header, which SvelteKit's
 own CSRF check refuses, and that check cannot be waived for one route. So

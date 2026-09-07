@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import Turnstile from '$lib/components/Turnstile.svelte';
 	import { TURNSTILE_ACTIONS, TURNSTILE_SITE_KEY } from '$lib/turnstile-config';
-	import { readTokenEmail } from '$lib/unsubscribe-token';
 
 	type Status = 'idle' | 'loading' | 'success' | 'error';
 	type TurnstileHandle = { reset: () => void };
@@ -13,7 +12,6 @@
 	let turnstileToken = $state<string | null>(null);
 	let turnstile = $state<TurnstileHandle>();
 	let token = $state<string | null>(null);
-	let tokenEmail = $state('');
 
 	// Email encoded to prevent scraping (same as NavContact)
 	const encodedContactEmail = 'c2l0ZUBncmVnb3J5LnNo';
@@ -23,12 +21,9 @@
 		window.location.href = 'mailto:' + contactEmail;
 	}
 
-	// Runs in the browser only, so neither the token nor the address it carries
-	// reaches the served HTML.
 	$effect(() => {
 		const params = $page.url.searchParams;
 		token = params.get('token');
-		tokenEmail = token ? (readTokenEmail(token) ?? '') : '';
 
 		const urlEmail = params.get('email');
 		if (!token && urlEmail) {
@@ -36,14 +31,17 @@
 		}
 	});
 
-	async function send(url: string, body?: string) {
+	async function handleSubmit(e: SubmitEvent) {
+		e.preventDefault();
+		if (!email.trim()) return;
+
 		status = 'loading';
 
 		try {
-			const res = await fetch(url, {
+			const res = await fetch('/api/unsubscribe', {
 				method: 'POST',
-				headers: body ? { 'Content-Type': 'application/json' } : undefined,
-				body
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email, turnstileToken })
 			});
 
 			const data = (await res.json()) as { error?: string; message?: string };
@@ -67,17 +65,6 @@
 			turnstile?.reset();
 		}
 	}
-
-	function handleConfirm() {
-		if (!token) return;
-		send(`/api/unsubscribe?token=${encodeURIComponent(token)}`);
-	}
-
-	function handleSubmit(e: SubmitEvent) {
-		e.preventDefault();
-		if (!email.trim()) return;
-		send('/api/unsubscribe', JSON.stringify({ email, turnstileToken }));
-	}
 </script>
 
 <svelte:head>
@@ -88,7 +75,15 @@
 <article class="unsubscribe">
 	<h1>Unsubscribe</h1>
 
-	{#if status === 'success'}
+	{#if token}
+		<p>Unsubscribe this address from the mailing list?</p>
+
+		<!-- Real form submission, not fetch: the server's own response page
+		     (the confirmation a mail-client POST also gets) is what shows. -->
+		<form method="POST" action="/api/unsubscribe?token={encodeURIComponent(token)}">
+			<button type="submit">Unsubscribe</button>
+		</form>
+	{:else if status === 'success'}
 		<div class="result success">
 			<p>{message}</p>
 			<p class="note">You won't receive any more emails from me.</p>
@@ -96,22 +91,8 @@
 	{:else if status === 'error'}
 		<div class="result error">
 			<p>{message}</p>
-			{#if !token}
-				<button onclick={() => (status = 'idle')}>Try again</button>
-			{/if}
+			<button onclick={() => (status = 'idle')}>Try again</button>
 		</div>
-	{:else if token}
-		<p>
-			{#if tokenEmail}
-				Unsubscribe <span class="address">{tokenEmail}</span> from the mailing list?
-			{:else}
-				Unsubscribe from the mailing list?
-			{/if}
-		</p>
-
-		<button onclick={handleConfirm} disabled={status === 'loading'}>
-			{status === 'loading' ? 'Removing...' : 'Confirm unsubscribe'}
-		</button>
 	{:else}
 		<p>Enter your email to unsubscribe from the mailing list.</p>
 
@@ -225,10 +206,6 @@
 	.note {
 		color: var(--matrix-green-dim);
 		font-size: 0.85rem;
-	}
-
-	.address {
-		color: var(--matrix-green);
 	}
 
 	.email-link {

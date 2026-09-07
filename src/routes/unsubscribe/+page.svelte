@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import Turnstile from '$lib/components/Turnstile.svelte';
 	import { TURNSTILE_ACTIONS, TURNSTILE_SITE_KEY } from '$lib/turnstile-config';
+	import { readTokenEmail } from '$lib/unsubscribe-token';
 
 	type Status = 'idle' | 'loading' | 'success' | 'error';
 	type TurnstileHandle = { reset: () => void };
@@ -11,6 +12,8 @@
 	let message = $state('');
 	let turnstileToken = $state<string | null>(null);
 	let turnstile = $state<TurnstileHandle>();
+	let token = $state<string | null>(null);
+	let tokenEmail = $state('');
 
 	// Email encoded to prevent scraping (same as NavContact)
 	const encodedContactEmail = 'c2l0ZUBncmVnb3J5LnNo';
@@ -20,25 +23,27 @@
 		window.location.href = 'mailto:' + contactEmail;
 	}
 
-	// Check for email in URL params (from email links)
+	// Runs in the browser only, so neither the token nor the address it carries
+	// reaches the served HTML.
 	$effect(() => {
-		const urlEmail = $page.url.searchParams.get('email');
-		if (urlEmail) {
+		const params = $page.url.searchParams;
+		token = params.get('token');
+		tokenEmail = token ? (readTokenEmail(token) ?? '') : '';
+
+		const urlEmail = params.get('email');
+		if (!token && urlEmail) {
 			email = urlEmail;
 		}
 	});
 
-	async function handleSubmit(e: SubmitEvent) {
-		e.preventDefault();
-		if (!email.trim()) return;
-
+	async function send(url: string, body?: string) {
 		status = 'loading';
 
 		try {
-			const res = await fetch('/api/unsubscribe', {
+			const res = await fetch(url, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email, turnstileToken })
+				headers: body ? { 'Content-Type': 'application/json' } : undefined,
+				body
 			});
 
 			const data = (await res.json()) as { error?: string; message?: string };
@@ -62,6 +67,17 @@
 			turnstile?.reset();
 		}
 	}
+
+	function handleConfirm() {
+		if (!token) return;
+		send(`/api/unsubscribe?token=${encodeURIComponent(token)}`);
+	}
+
+	function handleSubmit(e: SubmitEvent) {
+		e.preventDefault();
+		if (!email.trim()) return;
+		send('/api/unsubscribe', JSON.stringify({ email, turnstileToken }));
+	}
 </script>
 
 <svelte:head>
@@ -80,8 +96,22 @@
 	{:else if status === 'error'}
 		<div class="result error">
 			<p>{message}</p>
-			<button onclick={() => (status = 'idle')}>Try again</button>
+			{#if !token}
+				<button onclick={() => (status = 'idle')}>Try again</button>
+			{/if}
 		</div>
+	{:else if token}
+		<p>
+			{#if tokenEmail}
+				Unsubscribe <span class="address">{tokenEmail}</span> from the mailing list?
+			{:else}
+				Unsubscribe from the mailing list?
+			{/if}
+		</p>
+
+		<button onclick={handleConfirm} disabled={status === 'loading'}>
+			{status === 'loading' ? 'Removing...' : 'Confirm unsubscribe'}
+		</button>
 	{:else}
 		<p>Enter your email to unsubscribe from the mailing list.</p>
 
@@ -195,6 +225,10 @@
 	.note {
 		color: var(--matrix-green-dim);
 		font-size: 0.85rem;
+	}
+
+	.address {
+		color: var(--matrix-green);
 	}
 
 	.email-link {

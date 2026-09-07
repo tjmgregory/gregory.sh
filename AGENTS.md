@@ -153,6 +153,37 @@ function handleEmailClick() {
 - Decode only on user interaction (click)
 - Use a button with onclick handler, not an anchor tag
 
+## One-click unsubscribe
+
+Newsletter emails carry a `List-Unsubscribe` header pointing at
+`https://gregory.sh/api/unsubscribe?token=<token>`. A mail client can POST that
+URL on its own (RFC 8058), so it has to prove where it came from without a form
+or a Turnstile challenge.
+
+The token is `base64url(email) + "." + base64url(HMAC-SHA256(secret, audience + ":" + email))`.
+The address is lowercased and trimmed before it is encoded and before it is
+signed. The HMAC key is the secret's own characters, not the bytes its hex
+spells out. `src/lib/unsubscribe-token.ts` builds and checks it with Web Crypto.
+
+- `UNSUBSCRIBE_AUDIENCE` in `src/lib/unsubscribe-config.ts` is the audience
+  store name signed into the token. The sender signs the same name.
+- `UNSUBSCRIBE_SECRET` is 32 random bytes as hex, held in 1Password and set on
+  the Pages project. The sender holds the same value, so never rotate one side
+  on its own:
+
+  ```bash
+  bunx wrangler pages secret put UNSUBSCRIBE_SECRET --project-name gregory-sh
+  ```
+
+  With no secret set the token path answers 503, never a silent removal.
+
+`POST /api/unsubscribe?token=...` checks the signature, deletes the KV row and
+answers the same JSON the form path answers. It skips Turnstile, because a mail
+client cannot solve one. A bad or missing signature answers 400 and never
+touches KV. `GET` on the same URL redirects to `/unsubscribe?token=...`, where
+the browser decodes the address out of the token and shows one confirm button.
+The address is never in the served HTML, per Email Protection above.
+
 ## CSS / Responsive
 
 **Mobile-first.** Base styles target mobile, then scale up with `min-width` media queries.

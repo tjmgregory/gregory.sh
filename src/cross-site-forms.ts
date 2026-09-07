@@ -17,7 +17,8 @@ function isFormBody(request: Request): boolean {
 
 /**
  * The one URL a mail client posts to. It sends no origin and cannot be given
- * one, and the signature on the token is what proves the request.
+ * one. Nothing on the site verifies the token itself; the newsroom checks it
+ * on its own sync, so this route only ever writes a marker, never a deletion.
  */
 function isOneClickUnsubscribe(url: URL): boolean {
 	return url.pathname === '/api/unsubscribe' && url.searchParams.has('token');

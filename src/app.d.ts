@@ -6,8 +6,6 @@ declare global {
 				SUBSCRIBERS: KVNamespace;
 				RSS_STATS: KVNamespace;
 				TURNSTILE_SECRET_KEY?: string;
-				/** Pages secret. Signs and checks one-click unsubscribe links. */
-				UNSUBSCRIBE_SECRET?: string;
 			};
 		}
 	}

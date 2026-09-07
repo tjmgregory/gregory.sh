@@ -1,50 +1,68 @@
-import { json, redirect } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { verifyTurnstile } from '$lib/server/turnstile';
 import { TURNSTILE_ACTIONS, TURNSTILE_HOSTNAMES } from '$lib/turnstile-config';
-import { UNSUBSCRIBE_AUDIENCE } from '$lib/unsubscribe-config';
-import { verifyUnsubscribeToken } from '$lib/unsubscribe-token';
 import { isValidEmail } from '$lib/validation';
 
 const UNSUBSCRIBED = { message: 'Unsubscribed successfully' };
+const UNAVAILABLE = { error: 'Service unavailable' };
+
+// Matches the token exactly as the newsroom put it in the List-Unsubscribe
+// URL. The site never decodes or verifies it, only checks this shape.
+const TOKEN_PATTERN = /^[A-Za-z0-9_.-]{1,512}$/;
+
+const REMOVING_PAGE = `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Unsubscribing | gregory.sh</title>
+<meta name="robots" content="noindex">
+</head>
+<body>
+<p>Your address is being removed from the gregory.sh mailing list.</p>
+</body>
+</html>`;
 
 export const GET: RequestHandler = ({ url }) => {
 	const token = url.searchParams.get('token');
-	redirect(
-		303,
-		token ? `/unsubscribe?token=${encodeURIComponent(token)}` : '/unsubscribe'
-	);
+	const location = token
+		? `/unsubscribe?token=${encodeURIComponent(token)}`
+		: '/unsubscribe';
+	return new Response(null, { status: 303, headers: { location } });
 };
 
+async function readVia(request: Request): Promise<'one-click' | 'confirm'> {
+	const body = await request.text();
+	const params = new URLSearchParams(body);
+	return params.get('List-Unsubscribe') === 'One-Click' ? 'one-click' : 'confirm';
+}
+
 export const POST: RequestHandler = async ({ request, url, platform }) => {
-	const token = url.searchParams.get('token');
-
 	// A mail client posting the List-Unsubscribe URL cannot solve a Turnstile
-	// challenge. The signature is what stands in for it.
-	if (token) {
-		const secret = platform?.env?.UNSUBSCRIBE_SECRET;
-		if (!secret) {
-			console.error('UNSUBSCRIBE_SECRET not available');
-			return json({ error: 'Service unavailable' }, { status: 503 });
-		}
-
-		const signedEmail = await verifyUnsubscribeToken({
-			token,
-			venture: UNSUBSCRIBE_AUDIENCE,
-			secret
-		});
-		if (!signedEmail) {
+	// challenge. The site does not verify this token; it only records that
+	// removal was requested. The newsroom verifies and deletes on its own sync.
+	if (url.searchParams.has('token')) {
+		const token = url.searchParams.get('token') ?? '';
+		if (!TOKEN_PATTERN.test(token)) {
 			return json({ error: 'Invalid unsubscribe link' }, { status: 400 });
 		}
 
 		if (!platform?.env?.SUBSCRIBERS) {
 			console.error('KV namespace SUBSCRIBERS not available');
-			return json({ error: 'Service unavailable' }, { status: 503 });
+			return json(UNAVAILABLE, { status: 503 });
 		}
 
-		await platform.env.SUBSCRIBERS.delete(signedEmail);
+		const via = await readVia(request);
+		const marker = { requestedAt: new Date().toISOString(), via };
 
-		return json(UNSUBSCRIBED);
+		await platform.env.SUBSCRIBERS.put(`unsub:${token}`, JSON.stringify(marker), {
+			expirationTtl: 60 * 60 * 24 * 30
+		});
+
+		return new Response(REMOVING_PAGE, {
+			status: 200,
+			headers: { 'content-type': 'text/html; charset=utf-8' }
+		});
 	}
 
 	let body: { email?: string; turnstileToken?: unknown };
@@ -64,7 +82,7 @@ export const POST: RequestHandler = async ({ request, url, platform }) => {
 	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
 	if (!turnstileSecret) {
 		console.error('TURNSTILE_SECRET_KEY not available');
-		return json({ error: 'Service unavailable' }, { status: 503 });
+		return json(UNAVAILABLE, { status: 503 });
 	}
 
 	const verified = await verifyTurnstile({
@@ -80,7 +98,7 @@ export const POST: RequestHandler = async ({ request, url, platform }) => {
 
 	if (!platform?.env?.SUBSCRIBERS) {
 		console.error('KV namespace SUBSCRIBERS not available');
-		return json({ error: 'Service unavailable' }, { status: 503 });
+		return json(UNAVAILABLE, { status: 503 });
 	}
 
 	const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);

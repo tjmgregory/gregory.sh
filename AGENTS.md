@@ -23,6 +23,7 @@ src/
       subscribe/+server.ts # Email capture endpoint
   lib/
     posts.ts              # Post loading utilities
+    newsroom/              # Client for the newsroom lists API (see below)
 content/
   posts/<year>/<month>/   # Markdown blog posts, filed by year and month
 docs/
@@ -58,6 +59,9 @@ bun run preview          # Preview production build
 bun run check            # Type checking
 bun run test             # Run tests in watch mode
 bun run test:run         # Run tests once
+bun run newsroom:pull     # refreshes the pinned newsroom lists schema
+bun run newsroom:generate # regenerates the typed client from the pinned schema
+bun run newsroom:check    # fails when the client and the schema have drifted
 ```
 
 ## Dev Server & Port Management
@@ -153,6 +157,40 @@ function handleEmailClick() {
 - Decode only on user interaction (click)
 - Use a button with onclick handler, not an anchor tag
 
+## Newsroom lists API
+
+Subscribes and unsubscribes go through the newsroom's lists API, not just KV.
+`src/lib/newsroom/` holds a generated client for the list routes of
+`https://the-newsroom-lists.crafts.software`, and both API routes call it.
+
+- `client.server.ts` is the client. `lists.server.ts` builds it from the platform
+  env and maps a failure to the answer the browser gets. Both are server only,
+  because the bearer token must never reach the browser: nothing in a `.svelte`
+  file or under `src/lib/components` may import either.
+- `types.ts` and `openapi.json` are generated. Never edit them by hand.
+  `bun run newsroom:pull` refreshes the pinned schema (from the public host, or
+  from a checkout with `--from <path>`), `bun run newsroom:generate` rewrites the
+  types, and `bun run newsroom:check` fails when the two have drifted. CI runs
+  the check, so a hand-edited type cannot ship.
+- `src/lib/newsroom/config.ts` holds the list this site writes to
+  (`gregory_subscribers`) and `kvWrites`, the cutover switch: on, a signup or an
+  unsubscribe is also written to the `SUBSCRIBERS` KV namespace, so the old
+  audience sync keeps working. Off after the final sync, and then the KV
+  namespace can go. Any change to the routes has to hold for both settings, and
+  the tests check both.
+- The token is `NEWSROOM_LISTS_TOKEN`, a Pages secret. `deploy.yml` loads it from
+  1Password (`op://TSE Systems/gregory.sh - the-newsroom-lists bearer token/token`)
+  and writes it to both Pages environments before deploying. Never put it in
+  `wrangler.toml` and never add it as a GitHub secret. When a workflow reads a
+  variable that 1Password loaded, read it from the environment; naming it again
+  as `${{ secrets.NAME }}` shadows it with an empty value.
+- `NEWSROOM_LISTS_URL` overrides the host through `[vars]` in `wrangler.toml`. It
+  is only needed to point an environment somewhere other than the public host.
+- An API 400 comes back to the browser as a 400 carrying the API's own detail.
+  Everything else (a bad token, the wrong list, the list gone, the API down, no
+  answer at all) reads as 503 "Service unavailable": that is misconfiguration,
+  not the visitor's mistake.
+
 ## One-click unsubscribe
 
 Newsletter emails carry a `List-Unsubscribe` header pointing at
@@ -160,17 +198,17 @@ Newsletter emails carry a `List-Unsubscribe` header pointing at
 URL on its own (RFC 8058), and the same URL sits in the footer for a person to
 click.
 
-The site is a dumb front door. It does not verify the token: it checks the
-shape only (non-empty, at most 512 characters, `[A-Za-z0-9_.-]`), then writes
-`unsub:<token>` to `SUBSCRIBERS` with a 30-day TTL and answers 200 with a
-one-line HTML page. The newsroom, the only sender and the only side holding
-the verification secret, reads that marker on its own audience sync, checks
-the token there, and removes the address.
+The site checks the token's shape only (non-empty, at most 512 characters,
+`[A-Za-z0-9_.-]`), then hands it to the newsroom, which holds the verification
+secret and removes the address, and answers 200 with a one-line HTML page.
+While `kvWrites` is on it also writes the old `unsub:<token>` marker to
+`SUBSCRIBERS` with a 30-day TTL, so the newsroom's audience sync keeps working
+through the cutover.
 
 `GET /api/unsubscribe?token=...` redirects to `/unsubscribe?token=...` for a
 person who clicked the footer link, so a human confirms first. That page
-form-posts to the same URL a mail client hits, so both paths write the same
-marker and land on the same confirmation page.
+form-posts to the same URL a mail client hits, so both paths call the same
+newsroom endpoint and land on the same confirmation page.
 
 The mail client posts a form body with no `origin` header, which SvelteKit's
 own CSRF check refuses, and that check cannot be waived for one route. So

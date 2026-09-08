@@ -21,7 +21,7 @@ A subscriber removes their email address from the mailing list, exercising their
 2. Subscriber enters their email address
 3. Subscriber submits the form
 4. System validates the email format
-5. System removes the email from storage (if present)
+5. System removes the email through the newsroom lists API (if present)
 6. System displays confirmation message
 
 ## Alternate Flows
@@ -33,15 +33,18 @@ At step 1, if URL contains `?email=` parameter:
 
 ### A5: One-Click Link from Email
 The `List-Unsubscribe` header and footer link both point at
-`/api/unsubscribe?token=<token>`, one per newsletter recipient.
+`/api/unsubscribe?token=<token>`, one per newsletter recipient. This path
+carries no Turnstile challenge: a mail client cannot solve one.
 1. A mail client POSTs the URL directly (RFC 8058), or the subscriber clicks
    the link and lands on a one-line confirm page that form-posts the same URL
 2. System checks the token's shape only (non-empty, safe characters, under
    512 chars); it does not verify who the token belongs to
-3. System writes a marker (`unsub:<token>`) to storage with a 30-day TTL and
-   shows a one-line confirmation page
-4. The newsroom, the only side holding the verification secret, checks the
-   token and deletes the address on its own next audience sync
+3. System hands the token to the newsroom lists API, which holds the
+   verification secret and removes the address immediately
+4. While `kvWrites` is on, system also writes a marker (`unsub:<token>`) to
+   `SUBSCRIBERS` with a 30-day TTL, kept in step with the newsroom during the
+   cutover
+5. System shows a one-line confirmation page
 
 ### A2: Invalid Email Format
 At step 4, if the email format is invalid:
@@ -49,21 +52,23 @@ At step 4, if the email format is invalid:
 2. Subscriber corrects the email and resubmits
 
 ### A3: Email Not Found
-At step 5, if the email is not in the system:
+At step 5, if the email is not in the newsroom's list:
 1. System displays same success message (privacy-preserving)
 2. Flow ends (no information leaked about who is subscribed)
 
 ### A4: Service Unavailable
-At step 5, if storage is unavailable:
+At step 5, if the newsroom lists API cannot be reached or is misconfigured:
 1. System displays error message asking to try again later
 2. Flow ends
 
 ## Postconditions
 
-- Typed-address flow: email is removed from the subscriber list immediately
-  (if it was present)
-- One-click link flow: a removal marker is recorded immediately; the address
-  itself is removed when the newsroom's next audience sync checks the token
+- Typed-address flow: email is removed through the newsroom lists API
+  immediately (if it was present). While `kvWrites` is on, it is also deleted
+  from the `SUBSCRIBERS` KV namespace if present there.
+- One-click link flow: the newsroom lists API removes the address immediately
+  from the token alone. While `kvWrites` is on, a removal marker is also
+  recorded in `SUBSCRIBERS` with a 30-day TTL.
 - Subscriber sees confirmation of their action
 - No further emails will be sent to this address
 
@@ -85,7 +90,14 @@ At step 5, if storage is unavailable:
 ## Implementation Notes
 
 - Endpoint: POST /api/unsubscribe
-- Typed-address path: deletes key from Cloudflare KV, returns success even if
-  email wasn't found
-- One-click token path (`?token=`): writes a marker key, never reads or
-  deletes the address; the newsroom does that on its own sync
+- Both paths call the newsroom lists API (`src/lib/newsroom/`), server only,
+  with a bearer token held as the `NEWSROOM_LISTS_TOKEN` Pages secret
+- Typed-address path: verifies Turnstile, then unsubscribes through the
+  newsroom by email; returns success even if the email wasn't found
+- One-click token path (`?token=`): carries no Turnstile challenge, unsubscribes
+  through the newsroom by token
+- `kvWrites` in `src/lib/newsroom/config.ts` is the cutover switch: while on,
+  both paths also write to the `SUBSCRIBERS` KV namespace, same as before this
+  change. Off once the final audience sync has run.
+- An API 400 comes back as a 400 with the API's detail; anything else (bad
+  token, wrong list, list gone, API down, no answer) reads as 503

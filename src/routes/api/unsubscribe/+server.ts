@@ -1,25 +1,31 @@
 import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import {
+	listsClientFor,
+	listsErrorResponse,
+	UNAVAILABLE
+} from '$lib/newsroom/lists.server';
+import { site } from '$lib/newsroom/config';
 import { verifyTurnstile } from '$lib/server/turnstile';
 import { TURNSTILE_ACTIONS, TURNSTILE_HOSTNAMES } from '$lib/turnstile-config';
 import { isValidEmail } from '$lib/validation';
+import type { RequestHandler } from './$types';
 
 const UNSUBSCRIBED = { message: 'Unsubscribed successfully' };
-const UNAVAILABLE = { error: 'Service unavailable' };
 
 // Matches the token exactly as the newsroom put it in the List-Unsubscribe
-// URL. The site never decodes or verifies it, only checks this shape.
+// URL. The site never decodes it, only checks this shape before handing it
+// to the newsroom, which is what verifies it.
 const TOKEN_PATTERN = /^[A-Za-z0-9_.-]{1,512}$/;
 
 const REMOVING_PAGE = `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>Unsubscribing | gregory.sh</title>
+<title>Unsubscribing | ${site.name}</title>
 <meta name="robots" content="noindex">
 </head>
 <body>
-<p>Your address is being removed from the gregory.sh mailing list.</p>
+<p>Your address is being removed from the ${site.name} mailing list.</p>
 </body>
 </html>`;
 
@@ -37,27 +43,39 @@ async function readVia(request: Request): Promise<'one-click' | 'confirm'> {
 	return params.get('List-Unsubscribe') === 'One-Click' ? 'one-click' : 'confirm';
 }
 
-export const POST: RequestHandler = async ({ request, url, platform }) => {
+export const POST: RequestHandler = async ({ request, url, platform, fetch }) => {
 	// A mail client posting the List-Unsubscribe URL cannot solve a Turnstile
-	// challenge. The site does not verify this token; it only records that
-	// removal was requested. The newsroom verifies and deletes on its own sync.
+	// challenge, so this path carries none. The newsroom verifies the token.
 	if (url.searchParams.has('token')) {
 		const token = url.searchParams.get('token') ?? '';
 		if (!TOKEN_PATTERN.test(token)) {
 			return json({ error: 'Invalid unsubscribe link' }, { status: 400 });
 		}
 
-		if (!platform?.env?.SUBSCRIBERS) {
+		const lists = listsClientFor(platform?.env, fetch);
+		if (!lists) {
+			return json(UNAVAILABLE, { status: 503 });
+		}
+
+		if (site.kvWrites && !platform?.env?.SUBSCRIBERS) {
 			console.error('KV namespace SUBSCRIBERS not available');
 			return json(UNAVAILABLE, { status: 503 });
 		}
 
 		const via = await readVia(request);
-		const marker = { requestedAt: new Date().toISOString(), via };
 
-		await platform.env.SUBSCRIBERS.put(`unsub:${token}`, JSON.stringify(marker), {
-			expirationTtl: 60 * 60 * 24 * 30
-		});
+		try {
+			await lists.unsubscribe(site.newsroomList, { token });
+		} catch (error) {
+			return listsErrorResponse(error);
+		}
+
+		if (site.kvWrites && platform?.env?.SUBSCRIBERS) {
+			const marker = { requestedAt: new Date().toISOString(), via };
+			await platform.env.SUBSCRIBERS.put(`unsub:${token}`, JSON.stringify(marker), {
+				expirationTtl: 60 * 60 * 24 * 30
+			});
+		}
 
 		return new Response(REMOVING_PAGE, {
 			status: 200,
@@ -96,19 +114,29 @@ export const POST: RequestHandler = async ({ request, url, platform }) => {
 		return json({ error: 'Verification failed. Please try again.' }, { status: 400 });
 	}
 
-	if (!platform?.env?.SUBSCRIBERS) {
+	const lists = listsClientFor(platform?.env, fetch);
+	if (!lists) {
+		return json(UNAVAILABLE, { status: 503 });
+	}
+
+	if (site.kvWrites && !platform?.env?.SUBSCRIBERS) {
 		console.error('KV namespace SUBSCRIBERS not available');
 		return json(UNAVAILABLE, { status: 503 });
 	}
 
-	const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);
-
-	if (!existing) {
-		// Don't reveal whether email was subscribed (privacy)
-		return json(UNSUBSCRIBED);
+	try {
+		await lists.unsubscribe(site.newsroomList, { email: normalizedEmail });
+	} catch (error) {
+		return listsErrorResponse(error);
 	}
 
-	await platform.env.SUBSCRIBERS.delete(normalizedEmail);
+	if (site.kvWrites && platform?.env?.SUBSCRIBERS) {
+		const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);
+		if (existing) {
+			await platform.env.SUBSCRIBERS.delete(normalizedEmail);
+		}
+	}
 
+	// Don't reveal whether the address was subscribed (privacy).
 	return json(UNSUBSCRIBED);
 };

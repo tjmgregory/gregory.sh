@@ -21,7 +21,7 @@ A reader provides their email address to receive future updates from the site, w
 2. System displays links to privacy policy and unsubscribe option
 3. Reader submits the form (consent implied by action)
 4. System validates the email format
-5. System stores the email with timestamp
+5. System subscribes the email through the newsroom lists API, with timestamp
 6. System displays confirmation message
 
 ## Alternate Flows
@@ -37,13 +37,15 @@ At step 5, if the email already exists:
 2. Flow ends (no duplicate entry created)
 
 ### A3: Service Unavailable
-At step 5, if storage is unavailable:
+At step 5, if the newsroom lists API cannot be reached or is misconfigured:
 1. System displays error message asking to try again later
 2. Flow ends
 
 ## Postconditions
 
-- Email is stored in the subscriber list (unless already present)
+- Email is subscribed through the newsroom lists API (unless already present).
+  While `kvWrites` is on (cutover period), the email is also written to the
+  `SUBSCRIBERS` KV namespace so the old audience sync keeps working.
 - Reader sees confirmation of their action
 - Reader was informed of privacy policy and unsubscribe option before submitting
 
@@ -62,6 +64,11 @@ At step 5, if storage is unavailable:
 - See UC-002 for unsubscribe flow
 
 ## Data Stored
+
+The newsroom lists API is the record of who is subscribed. The site's
+`SUBSCRIBERS` KV namespace is a second write kept in step during the cutover
+(`kvWrites` in `src/lib/newsroom/config.ts`); it goes away once the final
+audience sync has run.
 
 | Field | Type | Description |
 |-------|------|-------------|

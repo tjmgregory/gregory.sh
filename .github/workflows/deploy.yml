@@ -24,6 +24,24 @@ jobs:
       - name: Build
         run: bun run build
 
+      # The newsroom lists bearer token comes from 1Password, addressed by a
+      # reference committed here. OP_SERVICE_ACCOUNT_TOKEN is the
+      # organisation's one GitHub secret, because it is what reads 1Password.
+      - uses: 1password/load-secrets-action@v5
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          NEWSROOM_LISTS_TOKEN: op://TSE Systems/gregory.sh - the-newsroom-lists bearer token/token
+
+      # load-secrets-action exits 0 when `op env ls` recognises no reference,
+      # so an unaddressable title exports nothing and the deploy ships a blank
+      # token instead of failing loudly. Catch that here.
+      - name: Check the newsroom lists token loaded
+        run: |
+          set -euo pipefail
+          [ -n "${NEWSROOM_LISTS_TOKEN:-}" ] || { echo "::error::NEWSROOM_LISTS_TOKEN did not load from 1Password"; exit 1; }
+
       - name: Create Pages project if needed
         uses: cloudflare/wrangler-action@v3
         continue-on-error: true
@@ -31,6 +49,21 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           command: pages project create gregory-sh --production-branch=main
+
+      # Both Pages environments, because previews run the same code and the
+      # preview workflow holds no write credentials of its own. The loaded
+      # variable is read straight from the environment: naming it again as
+      # ${{ secrets.NEWSROOM_LISTS_TOKEN }} would shadow it with an empty value.
+      - name: Set the newsroom lists token as a Pages secret
+        run: |
+          set -euo pipefail
+          for target in production preview; do
+            printf '%s' "$NEWSROOM_LISTS_TOKEN" | bunx wrangler pages secret put NEWSROOM_LISTS_TOKEN \
+              --project-name gregory-sh --env "$target"
+          done
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

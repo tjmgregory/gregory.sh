@@ -66,9 +66,9 @@ At step 5, if the newsroom lists API cannot be reached or is misconfigured:
 ## Data Stored
 
 The newsroom lists API is the record of who is subscribed. The site's
-`SUBSCRIBERS` KV namespace is a second write kept in step during the cutover
-(`kvWrites` in `src/lib/newsroom/config.ts`); it goes away once the final
-audience sync has run.
+`SUBSCRIBERS` KV namespace was a second write kept in step during the cutover
+(`kvWrites` in `src/lib/newsroom/config.ts`); off as of 2026-09-08, now the
+final audience sync has run, and the namespace awaits deletion.
 
 | Field | Type | Description |
 |-------|------|-------------|

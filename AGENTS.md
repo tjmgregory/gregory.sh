@@ -175,9 +175,9 @@ Subscribes and unsubscribes go through the newsroom's lists API, not just KV.
 - `src/lib/newsroom/config.ts` holds the list this site writes to
   (`gregory_subscribers`) and `kvWrites`, the cutover switch: on, a signup or an
   unsubscribe is also written to the `SUBSCRIBERS` KV namespace, so the old
-  audience sync keeps working. Off after the final sync, and then the KV
-  namespace can go. Any change to the routes has to hold for both settings, and
-  the tests check both.
+  audience sync keeps working. Off as of 2026-09-08: the final sync ran, and
+  the `SUBSCRIBERS` namespace awaits deletion. Any change to the routes has to
+  hold for both settings, and the tests check both.
 - The token is `NEWSROOM_LISTS_TOKEN`, a Pages secret. `deploy.yml` loads it from
   1Password (`op://TSE Systems/gregory.sh - the-newsroom-lists bearer token/token`)
   and writes it to both Pages environments before deploying. Never put it in

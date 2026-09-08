@@ -13,8 +13,8 @@ export const site = {
 	/**
 	 * Whether a signup or an unsubscribe is also written to the SUBSCRIBERS KV
 	 * namespace. The newsroom lists API is the record; KV is the old store,
-	 * kept in step during cutover. Turn this off once the final audience sync
-	 * has run, then the KV namespace can go.
+	 * kept in step during cutover. Off as of 2026-09-08: the final audience
+	 * sync has run and the SUBSCRIBERS namespace awaits deletion.
 	 */
-	kvWrites: true as boolean
+	kvWrites: false as boolean
 };

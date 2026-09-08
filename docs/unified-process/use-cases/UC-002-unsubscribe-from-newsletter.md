@@ -98,6 +98,6 @@ At step 5, if the newsroom lists API cannot be reached or is misconfigured:
   through the newsroom by token
 - `kvWrites` in `src/lib/newsroom/config.ts` is the cutover switch: while on,
   both paths also write to the `SUBSCRIBERS` KV namespace, same as before this
-  change. Off once the final audience sync has run.
+  change. Off as of 2026-09-08, now the final audience sync has run.
 - An API 400 comes back as a 400 with the API's detail; anything else (bad
   token, wrong list, list gone, API down, no answer) reads as 503

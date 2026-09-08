@@ -48,26 +48,10 @@ export const POST: RequestHandler = async ({ request, platform, fetch }) => {
 		return json(UNAVAILABLE, { status: 503 });
 	}
 
-	// Checked before the API call so a signup is never half written.
-	if (site.kvWrites && !platform?.env?.SUBSCRIBERS) {
-		console.error('KV namespace SUBSCRIBERS not available');
-		return json(UNAVAILABLE, { status: 503 });
-	}
-
 	try {
 		await lists.subscribe(site.newsroomList, normalizedEmail, readFields(body.fields));
 	} catch (error) {
 		return listsErrorResponse(error);
-	}
-
-	if (site.kvWrites && platform?.env?.SUBSCRIBERS) {
-		const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);
-		if (!existing) {
-			await platform.env.SUBSCRIBERS.put(
-				normalizedEmail,
-				JSON.stringify({ subscribedAt: new Date().toISOString() })
-			);
-		}
 	}
 
 	// Same response shape for new and existing emails so the endpoint cannot be

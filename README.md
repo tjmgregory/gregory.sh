@@ -6,7 +6,7 @@ Personal website and blog. Building in public.
 
 - [SvelteKit](https://svelte.dev/) + [mdsvex](https://mdsvex.pngwn.io/) for markdown
 - [Cloudflare Pages](https://pages.cloudflare.com/) for hosting
-- Self-hosted email capture via Cloudflare Workers + KV
+- Email capture through the newsroom's lists API
 
 ## Development
 

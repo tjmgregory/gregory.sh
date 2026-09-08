@@ -159,7 +159,8 @@ function handleEmailClick() {
 
 ## Newsroom lists API
 
-Subscribes and unsubscribes go through the newsroom's lists API, not just KV.
+Subscribes and unsubscribes go through the newsroom's lists API. That API is
+the only list of record; the site holds no subscriber store of its own.
 `src/lib/newsroom/` holds a generated client for the list routes of
 `https://the-newsroom-lists.crafts.software`, and both API routes call it.
 
@@ -173,11 +174,7 @@ Subscribes and unsubscribes go through the newsroom's lists API, not just KV.
   types, and `bun run newsroom:check` fails when the two have drifted. CI runs
   the check, so a hand-edited type cannot ship.
 - `src/lib/newsroom/config.ts` holds the list this site writes to
-  (`gregory_subscribers`) and `kvWrites`, the cutover switch: on, a signup or an
-  unsubscribe is also written to the `SUBSCRIBERS` KV namespace, so the old
-  audience sync keeps working. Off as of 2026-09-08: the final sync ran, and
-  the `SUBSCRIBERS` namespace awaits deletion. Any change to the routes has to
-  hold for both settings, and the tests check both.
+  (`gregory_subscribers`).
 - The token is `NEWSROOM_LISTS_TOKEN`, a Pages secret. `deploy.yml` loads it from
   1Password (`op://TSE Systems/gregory.sh - the-newsroom-lists bearer token/token`)
   and writes it to both Pages environments before deploying. Never put it in
@@ -201,9 +198,6 @@ click.
 The site checks the token's shape only (non-empty, at most 512 characters,
 `[A-Za-z0-9_.-]`), then hands it to the newsroom, which holds the verification
 secret and removes the address, and answers 200 with a one-line HTML page.
-While `kvWrites` is on it also writes the old `unsub:<token>` marker to
-`SUBSCRIBERS` with a 30-day TTL, so the newsroom's audience sync keeps working
-through the cutover.
 
 `GET /api/unsubscribe?token=...` redirects to `/unsubscribe?token=...` for a
 person who clicked the footer link, so a human confirms first. That page

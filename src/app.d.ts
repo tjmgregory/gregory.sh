@@ -2,8 +2,14 @@
 declare global {
 	namespace App {
 		interface Platform {
+			context?: { waitUntil(promise: Promise<unknown>): void };
 			env: {
-				RSS_STATS: KVNamespace;
+			RSS_STATS: KVNamespace;
+			HEALTH_STATE: DurableObjectNamespace;
+			HEALTH_ENVIRONMENT?: 'local' | 'preview' | 'production';
+			CF_PAGES_COMMIT_SHA?: string;
+			HEALTH_STATE: DurableObjectNamespace;
+			HEALTH_ENVIRONMENT?: 'local' | 'preview' | 'production';
 				TURNSTILE_SECRET_KEY?: string;
 				/** Pages secret, set by the deploy workflow from 1Password. */
 				NEWSROOM_LISTS_TOKEN?: string;

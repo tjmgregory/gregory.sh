@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { observeDependency } from '$lib/health.server';
 import {
 	listsClientFor,
 	listsErrorResponse,
@@ -52,7 +53,9 @@ export const POST: RequestHandler = async ({ request, url, platform, fetch }) =>
 		}
 
 		try {
-			await lists.unsubscribe(site.newsroomList, { token });
+			await observeDependency(platform, 'lists-unsubscribe', () =>
+				lists.unsubscribe(site.newsroomList, { token })
+			);
 		} catch (error) {
 			return listsErrorResponse(error);
 		}
@@ -100,7 +103,9 @@ export const POST: RequestHandler = async ({ request, url, platform, fetch }) =>
 	}
 
 	try {
-		await lists.unsubscribe(site.newsroomList, { email: normalizedEmail });
+		await observeDependency(platform, 'lists-unsubscribe', () =>
+			lists.unsubscribe(site.newsroomList, { email: normalizedEmail })
+		);
 	} catch (error) {
 		return listsErrorResponse(error);
 	}

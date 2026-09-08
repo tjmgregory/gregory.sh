@@ -1,0 +1,12 @@
+{
+  "contract": "tse-health-v1",
+  "sourceRepository": "the-software-engineer/unikraft-deploy",
+  "files": {
+    "package.json": "0272dc368daa0bdb662e37caddf179a98bd50884198ac150937b2922b62fca65",
+    "health/schema-v1.json": "dcd4d85c592a02b064bcf948afceaef9e14e1b8e57c80fb3c6b4b9108889c34c",
+    "health/validate-structure-v1.mjs": "33bdf06fb7426a847472707ac706593e88eb8cf0ad55c6c904fbb9ca7d6bd9ae",
+    "health/validate-v1.mjs": "17011949c482309ee0ae9339e025f9a83c5f59d73b8f898399993e3537eddd85",
+    "scripts/validate-health.mjs": "bbfc94f23b32e737384bf6b9915bfe2b40e91fc7782a7efa902dec9d0c410a5c",
+    "scripts/verify-health-vendor.mjs": "2893f0774732d89f91079aa1e8f56d34eeb672bf62dc6f9ac885d35e9fee5b6c"
+  }
+}

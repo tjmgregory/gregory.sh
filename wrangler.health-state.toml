@@ -1,0 +1,11 @@
+name = "gregory-sh-health-state-test"
+main = "test/health-state-worker.ts"
+compatibility_date = "2024-01-01"
+
+[[durable_objects.bindings]]
+name = "HEALTH_STATE"
+class_name = "HealthState"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["HealthState"]

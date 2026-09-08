@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { observeDependency } from '$lib/health.server';
 import {
 	listsClientFor,
 	listsErrorResponse,
@@ -49,7 +50,9 @@ export const POST: RequestHandler = async ({ request, platform, fetch }) => {
 	}
 
 	try {
-		await lists.subscribe(site.newsroomList, normalizedEmail, readFields(body.fields));
+		await observeDependency(platform, 'lists-subscribe', () =>
+			lists.subscribe(site.newsroomList, normalizedEmail, readFields(body.fields))
+		);
 	} catch (error) {
 		return listsErrorResponse(error);
 	}

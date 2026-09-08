@@ -1,0 +1,18 @@
+{
+  "name": "@the-software-engineer/unikraft-deploy-health",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./health": "./health/validate-v1.mjs",
+    "./health/schema": "./health/schema-v1.json"
+  },
+  "scripts": {
+    "health:generate": "node scripts/generate-health-validator.mjs && node scripts/generate-health-vendor-manifest.mjs",
+    "health:verify-vendor": "node scripts/verify-health-vendor.mjs .",
+    "health:test": "node --test test/health-contract.test.mjs test/health-vendor.test.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.17.1"
+  }
+}

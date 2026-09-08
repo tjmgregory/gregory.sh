@@ -15,6 +15,7 @@
 		"test:run": "vitest run",
 		"test:health-state": "vitest run --config vitest.health-state.config.ts",
 		"check:health-vendor": "node vendor/health-contract/scripts/verify-health-vendor.mjs vendor/health-contract --manifest-sha256 f3bbeb66af0da02225ad26322252b55aa260e0d8af7d95e9424c11e1bfb8033d",
+		"check:health-adapter": "node vendor/health-contract/scripts/verify-health-adapter.mjs",
 		"og:generate": "bun run scripts/generate-og-images.ts",
 		"publish": "bun run scripts/publish.ts",
 		"newsroom:pull": "bun run scripts/newsroom-pull.ts",

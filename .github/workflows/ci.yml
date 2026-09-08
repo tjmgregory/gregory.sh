@@ -33,5 +33,8 @@ jobs:
       - name: Verify health vendor
         run: bun run check:health-vendor
 
+      - name: Verify health adapter
+        run: bun run check:health-adapter
+
       - name: Build
         run: bun run build

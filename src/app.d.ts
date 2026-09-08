@@ -3,7 +3,6 @@ declare global {
 	namespace App {
 		interface Platform {
 			env: {
-				SUBSCRIBERS: KVNamespace;
 				RSS_STATS: KVNamespace;
 				TURNSTILE_SECRET_KEY?: string;
 				/** Pages secret, set by the deploy workflow from 1Password. */

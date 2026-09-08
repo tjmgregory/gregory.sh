@@ -44,8 +44,6 @@ At step 5, if the newsroom lists API cannot be reached or is misconfigured:
 ## Postconditions
 
 - Email is subscribed through the newsroom lists API (unless already present).
-  While `kvWrites` is on (cutover period), the email is also written to the
-  `SUBSCRIBERS` KV namespace so the old audience sync keeps working.
 - Reader sees confirmation of their action
 - Reader was informed of privacy policy and unsubscribe option before submitting
 
@@ -65,10 +63,8 @@ At step 5, if the newsroom lists API cannot be reached or is misconfigured:
 
 ## Data Stored
 
-The newsroom lists API is the record of who is subscribed. The site's
-`SUBSCRIBERS` KV namespace was a second write kept in step during the cutover
-(`kvWrites` in `src/lib/newsroom/config.ts`); off as of 2026-09-08, now the
-final audience sync has run, and the namespace awaits deletion.
+The newsroom lists API is the record of who is subscribed. The site holds no
+subscriber store of its own.
 
 | Field | Type | Description |
 |-------|------|-------------|

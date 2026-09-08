@@ -41,10 +41,7 @@ carries no Turnstile challenge: a mail client cannot solve one.
    512 chars); it does not verify who the token belongs to
 3. System hands the token to the newsroom lists API, which holds the
    verification secret and removes the address immediately
-4. While `kvWrites` is on, system also writes a marker (`unsub:<token>`) to
-   `SUBSCRIBERS` with a 30-day TTL, kept in step with the newsroom during the
-   cutover
-5. System shows a one-line confirmation page
+4. System shows a one-line confirmation page
 
 ### A2: Invalid Email Format
 At step 4, if the email format is invalid:
@@ -64,11 +61,9 @@ At step 5, if the newsroom lists API cannot be reached or is misconfigured:
 ## Postconditions
 
 - Typed-address flow: email is removed through the newsroom lists API
-  immediately (if it was present). While `kvWrites` is on, it is also deleted
-  from the `SUBSCRIBERS` KV namespace if present there.
+  immediately (if it was present).
 - One-click link flow: the newsroom lists API removes the address immediately
-  from the token alone. While `kvWrites` is on, a removal marker is also
-  recorded in `SUBSCRIBERS` with a 30-day TTL.
+  from the token alone.
 - Subscriber sees confirmation of their action
 - No further emails will be sent to this address
 
@@ -96,8 +91,5 @@ At step 5, if the newsroom lists API cannot be reached or is misconfigured:
   newsroom by email; returns success even if the email wasn't found
 - One-click token path (`?token=`): carries no Turnstile challenge, unsubscribes
   through the newsroom by token
-- `kvWrites` in `src/lib/newsroom/config.ts` is the cutover switch: while on,
-  both paths also write to the `SUBSCRIBERS` KV namespace, same as before this
-  change. Off as of 2026-09-08, now the final audience sync has run.
 - An API 400 comes back as a 400 with the API's detail; anything else (bad
   token, wrong list, list gone, API down, no answer) reads as 503

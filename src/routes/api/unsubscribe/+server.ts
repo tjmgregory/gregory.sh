@@ -37,12 +37,6 @@ export const GET: RequestHandler = ({ url }) => {
 	return new Response(null, { status: 303, headers: { location } });
 };
 
-async function readVia(request: Request): Promise<'one-click' | 'confirm'> {
-	const body = await request.text();
-	const params = new URLSearchParams(body);
-	return params.get('List-Unsubscribe') === 'One-Click' ? 'one-click' : 'confirm';
-}
-
 export const POST: RequestHandler = async ({ request, url, platform, fetch }) => {
 	// A mail client posting the List-Unsubscribe URL cannot solve a Turnstile
 	// challenge, so this path carries none. The newsroom verifies the token.
@@ -57,24 +51,10 @@ export const POST: RequestHandler = async ({ request, url, platform, fetch }) =>
 			return json(UNAVAILABLE, { status: 503 });
 		}
 
-		if (site.kvWrites && !platform?.env?.SUBSCRIBERS) {
-			console.error('KV namespace SUBSCRIBERS not available');
-			return json(UNAVAILABLE, { status: 503 });
-		}
-
-		const via = await readVia(request);
-
 		try {
 			await lists.unsubscribe(site.newsroomList, { token });
 		} catch (error) {
 			return listsErrorResponse(error);
-		}
-
-		if (site.kvWrites && platform?.env?.SUBSCRIBERS) {
-			const marker = { requestedAt: new Date().toISOString(), via };
-			await platform.env.SUBSCRIBERS.put(`unsub:${token}`, JSON.stringify(marker), {
-				expirationTtl: 60 * 60 * 24 * 30
-			});
 		}
 
 		return new Response(REMOVING_PAGE, {
@@ -119,22 +99,10 @@ export const POST: RequestHandler = async ({ request, url, platform, fetch }) =>
 		return json(UNAVAILABLE, { status: 503 });
 	}
 
-	if (site.kvWrites && !platform?.env?.SUBSCRIBERS) {
-		console.error('KV namespace SUBSCRIBERS not available');
-		return json(UNAVAILABLE, { status: 503 });
-	}
-
 	try {
 		await lists.unsubscribe(site.newsroomList, { email: normalizedEmail });
 	} catch (error) {
 		return listsErrorResponse(error);
-	}
-
-	if (site.kvWrites && platform?.env?.SUBSCRIBERS) {
-		const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);
-		if (existing) {
-			await platform.env.SUBSCRIBERS.delete(normalizedEmail);
-		}
 	}
 
 	// Don't reveal whether the address was subscribed (privacy).

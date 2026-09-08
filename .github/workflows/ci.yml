@@ -27,5 +27,11 @@ jobs:
       - name: Test
         run: bun run test:run
 
+      - name: Test shared health runtime
+        run: bun run test:health-state
+
+      - name: Verify health vendor
+        run: bun run check:health-vendor
+
       - name: Build
         run: bun run build

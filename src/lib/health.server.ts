@@ -39,5 +39,6 @@ export async function healthDocument(platform: App.Platform | undefined) {
 	if (!platform?.env?.RSS_STATS) throw new Error('RSS_STATS binding unavailable');
 	if (!platform?.env?.HEALTH_STATE) throw new Error('HEALTH_STATE binding unavailable');
 	if (!platform?.env?.TURNSTILE_SECRET_KEY) throw new Error('TURNSTILE_SECRET_KEY unavailable');
+	if (!platform?.env?.NEWSROOM_LISTS_TOKEN) throw new Error('NEWSROOM_LISTS_TOKEN unavailable');
 	return health.read(platform);
 }

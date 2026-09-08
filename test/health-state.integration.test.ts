@@ -52,7 +52,8 @@ describe('Gregory health runtime', () => {
 		const state = platform();
 		const originalFetch = globalThis.fetch;
 		globalThis.fetch = async () => Response.json({ success: true, action: 'newsletter_subscribe', hostname: 'gregory.sh' });
-		const listFetch = async () => Response.json({ ok: true });
+		let listStatus = 200;
+		const listFetch = async () => new Response(JSON.stringify({ ok: listStatus === 200 }), { status: listStatus, headers: { 'content-type': 'application/json' } });
 		const subscribeResponse = await subscribe({
 			request: new Request('https://gregory.sh/api/subscribe', { method: 'POST', body: JSON.stringify({ email: 'a@example.com', turnstileToken: 'token' }), headers: { 'content-type': 'application/json' } }),
 			platform: state.value,
@@ -67,6 +68,19 @@ describe('Gregory health runtime', () => {
 		expect(rssResponse.status).toBe(200);
 		expect(response.status).toBe(200);
 		expect(body).toMatchObject({ status: 'pass', serviceId: 'gregory-sh-web' });
+		globalThis.fetch = async () => Response.json({ success: true, action: 'newsletter_subscribe', hostname: 'gregory.sh' });
+		listStatus = 503;
+		const failedSubscribe = await subscribe({
+			request: new Request('https://gregory.sh/api/subscribe', { method: 'POST', body: JSON.stringify({ email: 'b@example.com', turnstileToken: 'token' }), headers: { 'content-type': 'application/json' } }),
+			platform: state.value,
+			fetch: listFetch
+		} as never);
+		await Promise.all(state.pending);
+		const warned = await healthz({ platform: state.value } as never);
+		const warnedBody = await warned.json() as { status: string; checks: Record<string, Array<{ status: string }>> };
+		expect(failedSubscribe.status).toBe(503);
+		expect(warned.status).toBe(200);
+		expect(warnedBody.checks['lists-subscribe'][0].status).toBe('warn');
 	});
 
 	it('keeps RSS get success separate from a real put failure', async () => {

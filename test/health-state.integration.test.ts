@@ -18,12 +18,13 @@ function request(path: string, body?: unknown) {
 	});
 }
 
-function platform() {
+function platform(recorderFailure = false) {
 	const pending: Promise<unknown>[] = [];
+	const healthState = { getByName(name: string) { const stub = env.HEALTH_STATE.getByName(name); return { fetch(input: RequestInfo | URL, init?: RequestInit) { if (recorderFailure && new URL(String(input)).pathname === '/v1/observations') return Promise.reject(new Error('recorder unavailable')); return stub.fetch(input, init); } }; } };
 	return {
 		pending,
 		value: {
-			env: { ...env, RSS_STATS: rssKv(), TURNSTILE_SECRET_KEY: 'test-secret', NEWSROOM_LISTS_TOKEN: 'token', HEALTH_ENVIRONMENT: 'preview', CF_PAGES_COMMIT_SHA: 'release' },
+			env: { ...env, HEALTH_STATE: healthState, RSS_STATS: rssKv(), TURNSTILE_SECRET_KEY: 'test-secret', NEWSROOM_LISTS_TOKEN: 'token', HEALTH_ENVIRONMENT: 'preview', CF_PAGES_COMMIT_SHA: 'release' },
 			context: { waitUntil: (promise: Promise<unknown>) => pending.push(promise) }
 		} as unknown as App.Platform
 	};
@@ -91,5 +92,16 @@ describe('Gregory health runtime', () => {
 		const health = await healthz({ platform: failed } as never);
 		expect(response.status).toBe(200);
 		expect(health.status).toBe(503);
+	});
+
+	it('preserves a visitor Lists 400 and business success on recorder failure', async () => {
+		const state = platform(true);
+		const originalFetch = globalThis.fetch;
+		globalThis.fetch = async () => Response.json({ success: true, action: 'newsletter_subscribe', hostname: 'gregory.sh' });
+		const response = await subscribe({ request: new Request('https://gregory.sh/api/subscribe', { method: 'POST', body: JSON.stringify({ email: 'x@example.com', turnstileToken: 'token' }), headers: { 'content-type': 'application/json' } }), platform: state.value, fetch: async () => new Response(JSON.stringify({ detail: 'invalid fields' }), { status: 400 }) } as never);
+		const success = await subscribe({ request: new Request('https://gregory.sh/api/subscribe', { method: 'POST', body: JSON.stringify({ email: 'y@example.com', turnstileToken: 'token' }), headers: { 'content-type': 'application/json' } }), platform: state.value, fetch: async () => Response.json({ ok: true }) } as never);
+		globalThis.fetch = originalFetch;
+		expect(response.status).toBe(400);
+		expect(success.status).toBe(200);
 	});
 });

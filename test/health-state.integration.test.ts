@@ -95,13 +95,20 @@ describe('Gregory health runtime', () => {
 	});
 
 	it('preserves a visitor Lists 400 and business success on recorder failure', async () => {
-		const state = platform(true);
+		const state = platform();
 		const originalFetch = globalThis.fetch;
 		globalThis.fetch = async () => Response.json({ success: true, action: 'newsletter_subscribe', hostname: 'gregory.sh' });
 		const response = await subscribe({ request: new Request('https://gregory.sh/api/subscribe', { method: 'POST', body: JSON.stringify({ email: 'x@example.com', turnstileToken: 'token' }), headers: { 'content-type': 'application/json' } }), platform: state.value, fetch: async () => new Response(JSON.stringify({ detail: 'invalid fields' }), { status: 400 }) } as never);
-		const success = await subscribe({ request: new Request('https://gregory.sh/api/subscribe', { method: 'POST', body: JSON.stringify({ email: 'y@example.com', turnstileToken: 'token' }), headers: { 'content-type': 'application/json' } }), platform: state.value, fetch: async () => Response.json({ ok: true }) } as never);
+		await Promise.all(state.pending);
+		const healthy = await healthz({ platform: state.value } as never);
+		const healthyBody = await healthy.json() as { checks: Record<string, Array<{ status: string; lastAttemptAt: string | null }>> };
+		const recorderState = platform(true);
+		const success = await subscribe({ request: new Request('https://gregory.sh/api/subscribe', { method: 'POST', body: JSON.stringify({ email: 'y@example.com', turnstileToken: 'token' }), headers: { 'content-type': 'application/json' } }), platform: recorderState.value, fetch: async () => Response.json({ ok: true }) } as never);
+		await Promise.all(recorderState.pending);
 		globalThis.fetch = originalFetch;
 		expect(response.status).toBe(400);
+		expect(healthyBody.checks['lists-subscribe'][0].status).toBe('pass');
+		expect(healthyBody.checks['lists-subscribe'][0].lastAttemptAt).not.toBeNull();
 		expect(success.status).toBe(200);
 	});
 });

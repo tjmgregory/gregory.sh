@@ -26,6 +26,26 @@ jobs:
       - name: Build
         run: bun run build
 
+      # The newsroom lists token is loaded but not used here. It is the
+      # deploy job that writes it to the Pages project, for both
+      # environments; reading it on a PR is what catches a broken reference
+      # before main does. OP_SERVICE_ACCOUNT_TOKEN is the organisation's one
+      # GitHub secret, because it is what reads 1Password.
+      - uses: 1password/load-secrets-action@v5
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          NEWSROOM_LISTS_TOKEN: op://TSE Systems/gregory.sh - the-newsroom-lists bearer token/token
+
+      # load-secrets-action exits 0 when `op env ls` recognises no reference,
+      # so an unaddressable title exports nothing and the deploy ships a blank
+      # token instead of failing loudly. Catch that here.
+      - name: Check the newsroom lists token loaded
+        run: |
+          set -euo pipefail
+          [ -n "${NEWSROOM_LISTS_TOKEN:-}" ] || { echo "::error::NEWSROOM_LISTS_TOKEN did not load from 1Password"; exit 1; }
+
       - name: Deploy preview to Cloudflare Pages
         id: deploy
         uses: cloudflare/wrangler-action@v3

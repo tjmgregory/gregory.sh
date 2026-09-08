@@ -14,7 +14,10 @@
 		"test": "vitest",
 		"test:run": "vitest run",
 		"og:generate": "bun run scripts/generate-og-images.ts",
-		"publish": "bun run scripts/publish.ts"
+		"publish": "bun run scripts/publish.ts",
+		"newsroom:pull": "bun run scripts/newsroom-pull.ts",
+		"newsroom:generate": "bunx openapi-typescript src/lib/newsroom/openapi.json -o src/lib/newsroom/types.ts",
+		"newsroom:check": "bun run scripts/newsroom-check.ts"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260207.0",
@@ -28,6 +31,7 @@
 		"gray-matter": "^4.0.3",
 		"jsdom": "^28.0.0",
 		"mdsvex": "^0.12.6",
+		"openapi-typescript": "~7.13.0",
 		"satori": "^0.19.1",
 		"svelte": "^5.50.0",
 		"svelte-check": "^4.3.6",
@@ -35,5 +39,8 @@
 		"vite": "^7.3.1",
 		"vitest": "^4.0.18",
 		"wrangler": "^4.94.0"
+	},
+	"dependencies": {
+		"openapi-fetch": "^0.17.0"
 	}
 }

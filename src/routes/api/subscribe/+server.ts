@@ -1,11 +1,18 @@
 import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import {
+	listsClientFor,
+	listsErrorResponse,
+	readFields,
+	UNAVAILABLE
+} from '$lib/newsroom/lists.server';
+import { site } from '$lib/newsroom/config';
 import { verifyTurnstile } from '$lib/server/turnstile';
 import { TURNSTILE_ACTIONS, TURNSTILE_HOSTNAMES } from '$lib/turnstile-config';
 import { isValidEmail } from '$lib/validation';
+import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ request, platform }) => {
-	let body: { email?: string; turnstileToken?: unknown };
+export const POST: RequestHandler = async ({ request, platform, fetch }) => {
+	let body: { email?: string; fields?: unknown; turnstileToken?: unknown };
 	try {
 		body = (await request.json()) as typeof body;
 	} catch {
@@ -22,7 +29,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
 	if (!turnstileSecret) {
 		console.error('TURNSTILE_SECRET_KEY not available');
-		return json({ error: 'Service unavailable' }, { status: 503 });
+		return json(UNAVAILABLE, { status: 503 });
 	}
 
 	const verified = await verifyTurnstile({
@@ -36,19 +43,34 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		return json({ error: 'Verification failed. Please try again.' }, { status: 400 });
 	}
 
-	if (!platform?.env?.SUBSCRIBERS) {
+	const lists = listsClientFor(platform?.env, fetch);
+	if (!lists) {
+		return json(UNAVAILABLE, { status: 503 });
+	}
+
+	// Checked before the API call so a signup is never half written.
+	if (site.kvWrites && !platform?.env?.SUBSCRIBERS) {
 		console.error('KV namespace SUBSCRIBERS not available');
-		return json({ error: 'Service unavailable' }, { status: 503 });
+		return json(UNAVAILABLE, { status: 503 });
+	}
+
+	try {
+		await lists.subscribe(site.newsroomList, normalizedEmail, readFields(body.fields));
+	} catch (error) {
+		return listsErrorResponse(error);
+	}
+
+	if (site.kvWrites && platform?.env?.SUBSCRIBERS) {
+		const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);
+		if (!existing) {
+			await platform.env.SUBSCRIBERS.put(
+				normalizedEmail,
+				JSON.stringify({ subscribedAt: new Date().toISOString() })
+			);
+		}
 	}
 
 	// Same response shape for new and existing emails so the endpoint cannot be
 	// used to enumerate subscriber membership.
-	const existing = await platform.env.SUBSCRIBERS.get(normalizedEmail);
-	if (!existing) {
-		await platform.env.SUBSCRIBERS.put(normalizedEmail, JSON.stringify({
-			subscribedAt: new Date().toISOString()
-		}));
-	}
-
 	return json({ message: 'Subscribed successfully' });
 };

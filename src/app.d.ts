@@ -6,6 +6,10 @@ declare global {
 				SUBSCRIBERS: KVNamespace;
 				RSS_STATS: KVNamespace;
 				TURNSTILE_SECRET_KEY?: string;
+				/** Pages secret, set by the deploy workflow from 1Password. */
+				NEWSROOM_LISTS_TOKEN?: string;
+				/** Optional [vars] override for the newsroom lists host. */
+				NEWSROOM_LISTS_URL?: string;
 			};
 		}
 	}

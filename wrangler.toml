@@ -28,3 +28,13 @@ id = "3a7acd46675b43909b1e8156093d44a7"
 [[env.production.kv_namespaces]]
 binding = "RSS_STATS"
 id = "84bc853c97ba476e836d88f7fdebfb4c"
+
+# The newsroom lists API. The site code already defaults to
+# https://the-newsroom-lists.crafts.software, so these lines are only needed to
+# point an environment somewhere else. The bearer token is never in this file:
+# the deploy workflow sets NEWSROOM_LISTS_TOKEN as a Pages secret from 1Password.
+# [vars]
+# NEWSROOM_LISTS_URL = "https://the-newsroom-lists.crafts.software"
+#
+# [env.preview.vars]
+# NEWSROOM_LISTS_URL = "https://the-newsroom-lists.crafts.software"

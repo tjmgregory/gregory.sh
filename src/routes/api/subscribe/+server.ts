@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { observeDependency } from '$lib/health.server';
+import { observeDependency, observeTurnstile } from '$lib/health.server';
 import {
 	listsClientFor,
 	listsErrorResponse,
@@ -7,7 +7,6 @@ import {
 	UNAVAILABLE
 } from '$lib/newsroom/lists.server';
 import { site } from '$lib/newsroom/config';
-import { verifyTurnstile } from '$lib/server/turnstile';
 import { TURNSTILE_ACTIONS, TURNSTILE_HOSTNAMES } from '$lib/turnstile-config';
 import { isValidEmail } from '$lib/validation';
 import type { RequestHandler } from './$types';
@@ -33,7 +32,7 @@ export const POST: RequestHandler = async ({ request, platform, fetch }) => {
 		return json(UNAVAILABLE, { status: 503 });
 	}
 
-	const verified = await verifyTurnstile({
+	const verified = await observeTurnstile(platform, {
 		token: turnstileToken,
 		secret: turnstileSecret,
 		action: TURNSTILE_ACTIONS.subscribe,

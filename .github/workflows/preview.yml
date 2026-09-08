@@ -54,6 +54,24 @@ jobs:
           accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy --branch=${{ github.ref_name }} --commit-dirty=true
 
+      - name: Validate preview health
+        env:
+          BASE_URL: ${{ steps.deploy.outputs.deployment-url }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          for endpoint in livez healthz; do
+            status=''
+            for attempt in $(seq 1 10); do
+              status=$(curl --max-time 10 --silent --show-error --output "$endpoint.body" --write-out '%{http_code}' "$BASE_URL/$endpoint" || true)
+              [ "$status" = 200 ] && break
+              [ "$attempt" = 10 ] && { echo "$endpoint returned $status"; exit 1; }
+              sleep 2
+            done
+          done
+          node vendor/health-contract/scripts/validate-health.mjs healthz.body --http-status 200
+          node -e 'const h=JSON.parse(require("fs").readFileSync("healthz.body")); if(h.status!=="pass"||h.serviceId!=="gregory-sh-web"||h.version!==process.argv[1]) process.exit(1)' "$RELEASE_SHA"
+
       - name: Find PR for this branch
         id: find-pr
         run: |

@@ -1,4 +1,5 @@
 import { createHealthState } from '$lib/health-state.server';
+import { hasValidTurnstileInput, verifyTurnstileResult, type VerifyTurnstileOptions } from '$lib/server/turnstile';
 
 const health = createHealthState({
 	serviceId: 'gregory-sh-web',
@@ -17,6 +18,21 @@ export function observeDatastore<T>(platform: App.Platform | undefined, operatio
 
 export async function observeDependency<T>(platform: App.Platform | undefined, operation: 'lists-subscribe' | 'lists-unsubscribe' | 'turnstile-verify', run: () => Promise<T>) {
 	return health.observe(platform, operation, run);
+}
+
+export async function observeTurnstile(platform: App.Platform | undefined, input: VerifyTurnstileOptions) {
+	if (!hasValidTurnstileInput(input)) return false;
+	let result = { accepted: false, available: false, attempted: true };
+	try {
+		await health.observe(platform, 'turnstile-verify', async () => {
+			result = await verifyTurnstileResult(input);
+			if (!result.available) throw new Error('Turnstile unavailable');
+			return result;
+		});
+		return result.accepted;
+	} catch {
+		return false;
+	}
 }
 
 export async function healthDocument(platform: App.Platform | undefined) {

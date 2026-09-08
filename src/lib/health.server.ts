@@ -1,5 +1,6 @@
 import { createHealthState } from '$lib/health-state.server';
 import { hasValidTurnstileInput, verifyTurnstileResult, type VerifyTurnstileOptions } from '$lib/server/turnstile';
+import { NewsroomListsError } from '$lib/newsroom/client.server';
 
 const health = createHealthState({
 	serviceId: 'gregory-sh-web',
@@ -17,7 +18,7 @@ export function observeDatastore<T>(platform: App.Platform | undefined, operatio
 }
 
 export async function observeDependency<T>(platform: App.Platform | undefined, operation: 'lists-subscribe' | 'lists-unsubscribe' | 'turnstile-verify', run: () => Promise<T>) {
-	return health.observe(platform, operation, run);
+	return health.observe(platform, operation, run, (error) => error instanceof NewsroomListsError && error.status === 400);
 }
 
 export async function observeTurnstile(platform: App.Platform | undefined, input: VerifyTurnstileOptions) {

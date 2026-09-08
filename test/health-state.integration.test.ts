@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { GET as healthz } from '../src/routes/healthz/+server';
 import { POST as subscribe } from '../src/routes/api/subscribe/+server';
 import { GET as rssStats } from '../src/routes/api/rss-stats/+server';
+import { GET as rssXml } from '../src/routes/rss.xml/+server';
 
 declare global {
 	namespace Cloudflare { interface Env { HEALTH_STATE: DurableObjectNamespace } }
@@ -28,8 +29,8 @@ function platform() {
 	};
 }
 
-function rssKv(): KVNamespace {
-	return { get: async () => null, put: async () => undefined } as unknown as KVNamespace;
+function rssKv(failPut = false): KVNamespace {
+	return { get: async () => null, put: async () => { if (failPut) throw new Error('RSS stats unavailable'); } } as unknown as KVNamespace;
 }
 
 describe('Gregory health runtime', () => {
@@ -66,5 +67,15 @@ describe('Gregory health runtime', () => {
 		expect(rssResponse.status).toBe(200);
 		expect(response.status).toBe(200);
 		expect(body).toMatchObject({ status: 'pass', serviceId: 'gregory-sh-web' });
+	});
+
+	it('keeps RSS get success separate from a real put failure', async () => {
+		const state = platform();
+		const failed = { ...state.value, env: { ...state.value.env, RSS_STATS: rssKv(true) } } as App.Platform;
+		const response = await rssXml({ request: new Request('https://gregory.sh/rss.xml', { headers: { 'user-agent': 'Feedly/1.0; 3 subscribers' } }), platform: failed } as never);
+		await Promise.all(state.pending);
+		const health = await healthz({ platform: failed } as never);
+		expect(response.status).toBe(200);
+		expect(health.status).toBe(503);
 	});
 });

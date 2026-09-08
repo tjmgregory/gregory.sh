@@ -80,11 +80,11 @@ export function parseUserAgent(userAgent: string): ParsedReader {
 /**
  * Update RSS subscriber stats in KV
  */
-export async function trackRssSubscriber(kv: KVNamespace, userAgent: string): Promise<void> {
+export async function trackRssSubscriber(kv: KVNamespace, userAgent: string, observeGet: <T>(run: () => Promise<T>) => Promise<T> = (run) => run(), observePut: <T>(run: () => Promise<T>) => Promise<T> = (run) => run()): Promise<void> {
 	const parsed = parseUserAgent(userAgent);
 	const now = new Date().toISOString();
 
-	const existing = (await kv.get(RSS_STATS_KEY, 'json')) as RssSubscriberData | null;
+	const existing = (await observeGet(() => kv.get(RSS_STATS_KEY, 'json'))) as RssSubscriberData | null;
 
 	const data: RssSubscriberData = existing ?? {
 		readers: {},
@@ -114,7 +114,7 @@ export async function trackRssSubscriber(kv: KVNamespace, userAgent: string): Pr
 
 	data.lastUpdated = now;
 
-	await kv.put(RSS_STATS_KEY, JSON.stringify(data));
+	await observePut(() => kv.put(RSS_STATS_KEY, JSON.stringify(data)));
 }
 
 /**

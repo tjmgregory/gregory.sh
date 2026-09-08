@@ -23,8 +23,11 @@ export const GET: RequestHandler = async ({ request, platform }) => {
 	// Track subscriber (fire-and-forget)
 	const userAgent = request.headers.get('user-agent');
 	if (userAgent && platform?.env?.RSS_STATS) {
-		observeDatastore(platform, 'rss-stats-get', () =>
-			trackRssSubscriber(platform.env.RSS_STATS, userAgent)
+		trackRssSubscriber(
+			platform.env.RSS_STATS,
+			userAgent,
+			(run) => observeDatastore(platform, 'rss-stats-get', run),
+			(run) => observeDatastore(platform, 'rss-stats-put', run)
 		).catch((err) => console.error('RSS tracking error:', err));
 	}
 

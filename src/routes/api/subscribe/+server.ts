@@ -7,7 +7,7 @@ import {
 	UNAVAILABLE
 } from '$lib/newsroom/lists.server';
 import { site } from '$lib/newsroom/config';
-import { TURNSTILE_ACTIONS, TURNSTILE_HOSTNAMES } from '$lib/turnstile-config';
+import { TURNSTILE_ACTIONS } from '$lib/turnstile-config';
 import { isValidEmail } from '$lib/validation';
 import type { RequestHandler } from './$types';
 
@@ -36,7 +36,7 @@ export const POST: RequestHandler = async ({ request, platform, fetch }) => {
 		token: turnstileToken,
 		secret: turnstileSecret,
 		action: TURNSTILE_ACTIONS.subscribe,
-		allowedHostnames: TURNSTILE_HOSTNAMES,
+		allowedHostnames: [new URL(request.url).hostname],
 		remoteIp: request.headers.get('CF-Connecting-IP')
 	});
 	if (!verified) {

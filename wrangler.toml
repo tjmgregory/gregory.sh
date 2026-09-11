@@ -4,6 +4,7 @@ pages_build_output_dir = ".svelte-kit/cloudflare"
 
 [vars]
 HEALTH_ENVIRONMENT = "local"
+TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"
 
 [[durable_objects.bindings]]
 name = "HEALTH_STATE"
@@ -22,6 +23,7 @@ id = "b5e8ae3e864349b989cf6b3df495a043"
 
 [env.preview.vars]
 HEALTH_ENVIRONMENT = "preview"
+TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"
 
 [[env.preview.durable_objects.bindings]]
 name = "HEALTH_STATE"

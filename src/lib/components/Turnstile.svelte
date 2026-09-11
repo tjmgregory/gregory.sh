@@ -29,6 +29,7 @@
 
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { turnstileSiteKey } from '$lib/turnstile-config';
 
 	let {
 		siteKey,
@@ -58,8 +59,9 @@
 		void loadScript()
 			.then(() => {
 				if (!window.turnstile) throw new Error('Turnstile did not initialize');
+				const effectiveSiteKey = turnstileSiteKey(window.location.hostname, siteKey);
 				widgetId = window.turnstile.render(container, {
-					sitekey: siteKey,
+					sitekey: effectiveSiteKey,
 					action,
 					theme,
 					size: 'flexible',

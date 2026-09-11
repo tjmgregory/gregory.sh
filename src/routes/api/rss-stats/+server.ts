@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { observeDatastore } from '$lib/health.server';
 import { getRssStats } from '$lib/rss-stats';
 import type { RequestHandler } from './$types';
 
@@ -7,7 +8,14 @@ export const GET: RequestHandler = async ({ platform }) => {
 		return json({ error: 'Stats unavailable' }, { status: 503 });
 	}
 
-	const stats = await getRssStats(platform.env.RSS_STATS);
+	let stats;
+	try {
+		stats = await observeDatastore(platform, 'rss-stats-get', () =>
+			getRssStats(platform.env.RSS_STATS)
+		);
+	} catch {
+		return json({ error: 'Stats unavailable' }, { status: 503 });
+	}
 
 	if (!stats) {
 		return json({

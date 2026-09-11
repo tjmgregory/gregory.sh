@@ -8,7 +8,7 @@ const config = vi.hoisted(() => ({
 vi.mock('$lib/newsroom/config', () => ({ site: config }));
 
 const verifyTurnstile = vi.fn(async () => true);
-vi.mock('$lib/server/turnstile', () => ({ verifyTurnstile }));
+vi.mock('$lib/server/turnstile', () => ({ verifyTurnstile, hasValidTurnstileInput: vi.fn(() => true), verifyTurnstileResult: vi.fn(async () => ({ accepted: await verifyTurnstile(), available: true, attempted: true })) }));
 
 const { GET, POST } = await import('./+server');
 

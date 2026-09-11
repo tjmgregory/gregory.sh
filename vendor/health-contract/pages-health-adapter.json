@@ -1,0 +1,16 @@
+{
+  "contract": "tse-pages-health-v1",
+  "sourceRepository": "the-software-engineer/landing-template",
+  "sourceCommit": "e9174e7f9e428ff351914428367182b3264e1f4a",
+  "runtimeFixtureRepository": "the-software-engineer/sentinel",
+  "runtimeFixtureCommit": "651a443e1cb25503068e2ef54f0db6d16142fc8f",
+  "files": {
+    "src/lib/health-state.server.ts": "6d6a59bb9f52cb5a93eb986af57d6630d17f56c42fb355d4429e6ef355f207ab",
+    "vendor/health-contract/health-state.ts": "02b0f180afcee62ca846c20024c301035782be2f08b0658c2fc920e56ad33859"
+  },
+  "customizedFiles": [
+    "src/lib/health.server.ts",
+    "src/routes/healthz/+server.ts",
+    "src/routes/livez/+server.ts"
+  ]
+}

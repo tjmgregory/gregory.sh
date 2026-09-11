@@ -2,6 +2,15 @@ name = "gregory-sh"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
+[vars]
+HEALTH_ENVIRONMENT = "local"
+TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"
+
+[[durable_objects.bindings]]
+name = "HEALTH_STATE"
+class_name = "HealthState"
+script_name = "sentinel"
+
 # Local development (wrangler pages dev) - uses preview namespaces
 [[kv_namespaces]]
 binding = "RSS_STATS"
@@ -12,10 +21,27 @@ id = "b5e8ae3e864349b989cf6b3df495a043"
 binding = "RSS_STATS"
 id = "b5e8ae3e864349b989cf6b3df495a043"
 
+[env.preview.vars]
+HEALTH_ENVIRONMENT = "preview"
+TURNSTILE_SECRET_KEY = "1x0000000000000000000000000000000AA"
+
+[[env.preview.durable_objects.bindings]]
+name = "HEALTH_STATE"
+class_name = "HealthState"
+script_name = "sentinel"
+
 # Production deployments (main branch)
 [[env.production.kv_namespaces]]
 binding = "RSS_STATS"
 id = "84bc853c97ba476e836d88f7fdebfb4c"
+
+[env.production.vars]
+HEALTH_ENVIRONMENT = "production"
+
+[[env.production.durable_objects.bindings]]
+name = "HEALTH_STATE"
+class_name = "HealthState"
+script_name = "sentinel"
 
 # The newsroom lists API. The site code already defaults to
 # https://the-newsroom-lists.crafts.software, so these lines are only needed to

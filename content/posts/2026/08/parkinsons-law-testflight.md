@@ -1,5 +1,5 @@
 ---
-title: 'I Secretly Added The Signup Page, Then Did Nothing'
+title: I secretly added the signup page, then did nothing
 date: '2026-08-06T08:00:00+01:00'
 description: >-
   The Lanteon beta signup page went up in July and sat there. Then a friend

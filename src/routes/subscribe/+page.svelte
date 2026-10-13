@@ -57,7 +57,7 @@
 </svelte:head>
 
 <article class="subscribe">
-	<h1>Subscribe</h1>
+	<h1>Newsletter</h1>
 
 	{#if status === 'success'}
 		<div class="result success">
@@ -65,22 +65,22 @@
 			<p class="note">Next post lands in your inbox.</p>
 		</div>
 	{:else}
-		<p>
-			Expectant solofounder with vision larger than sense. Follow along to get early
-			access to all that pours out and share in the lessons learned along the way.
-		</p>
+		<p>What I’m building, what I’m learning, and which idea I pick.</p>
 
 		<form onsubmit={handleSubmit}>
 			<input
 				type="email"
 				bind:value={email}
-				placeholder="your@email"
+				placeholder="Email address"
+				aria-label="Email address"
+				autocomplete="email"
 				required
 				disabled={status === 'loading'}
 			/>
 			<Turnstile
 				bind:this={turnstile}
 				siteKey={TURNSTILE_SITE_KEY}
+				theme="auto"
 				action={TURNSTILE_ACTIONS.subscribe}
 				onToken={(token) => (turnstileToken = token)}
 				onError={() => {
@@ -102,79 +102,27 @@
 		</p>
 
 		<p class="note">
-			<a href="/privacy">Privacy policy</a> · <a href="/unsubscribe">Unsubscribe anytime</a>
+			<a href="/privacy">Privacy policy</a> ·
+			<a href="/unsubscribe">Unsubscribe anytime</a>
 		</p>
 	{/if}
 </article>
 
 <style>
-	.subscribe {
-		max-width: 480px;
+	article > p {
+		margin-top: 16px;
 	}
-
 	form {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		margin: 2rem 0;
+		gap: 8px;
+		margin: 24px 0;
+		max-width: 448px;
 	}
-
-	input {
-		background: transparent;
-		border: 1px solid var(--matrix-green-dim);
-		color: var(--matrix-green);
-		font-family: var(--font-mono);
-		font-size: 1rem;
-		padding: 0.75rem 1rem;
-		outline: none;
-		transition: border-color 0.15s ease;
-	}
-
-	input:focus {
-		border-color: var(--matrix-green);
-	}
-
-	input::placeholder {
-		color: var(--matrix-green-dim);
-		opacity: 0.6;
-	}
-
-	button {
-		background: var(--matrix-green-dim);
-		border: none;
-		color: var(--matrix-black);
-		font-family: var(--font-mono);
-		font-size: 1rem;
-		padding: 0.75rem 1rem;
-		cursor: pointer;
-		transition: background 0.15s ease;
-	}
-
-	button:hover:not(:disabled) {
-		background: var(--matrix-green);
-	}
-
-	button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
 	.result {
-		margin: 2rem 0;
-		padding: 1.5rem;
-		border: 1px solid var(--matrix-green);
+		margin: 24px 0;
 	}
-
-	.result p {
-		margin: 0;
-	}
-
-	.error-msg {
-		color: #ff4141;
-	}
-
-	.note {
-		color: var(--matrix-green-dim);
-		font-size: 0.85rem;
+	.result p + p {
+		margin-top: 16px;
 	}
 </style>

@@ -1,7 +1,7 @@
 ---
-title: Why I'm Building a Company Made of Agents
+title: Why I’m building a company made of agents
 date: 2026-02-09T17:30:00+01:00
-description: I'm building Inc—a system to run twelve businesses with agents instead of employees.
+description: I’m building Inc, a system to run companies with agents instead of employees.
 slug: building-inc
 ---
 
@@ -13,7 +13,7 @@ So I'm building a system to run businesses. I'm calling it Inc.
 
 The idea is simple enough: one system that lets me discover, validate, build, deploy, operate, market, and sell businesses with as little human effort as possible. Not zero human effort—I'm not delusional—but minimal. I want to find the floor.
 
-I'm planning to use Inc to launch twelve businesses. That number is a bit arbitrary, but it's a commitment to iteration. I'm not trying to find the one perfect idea and sprint at it. I'm trying to build a machine that gets better at finding and running ideas, and twelve gives me enough cycles to actually learn something.
+I'm planning to use Inc to launch a series of businesses. It's a commitment to iteration. I'm not trying to find the one perfect idea and sprint at it. I'm trying to build a machine that gets better at finding and running ideas, and repeated cycles give me a chance to learn.
 
 Here's the constraint I've set myself: no employees. Or at least, that's the starting position. If something genuinely requires human relationships I don't have, I'll reconsider. But the default is automation, not delegation. Hiring is the easy answer to most scaling problems, and I want to see what happens when you take it off the table.
 

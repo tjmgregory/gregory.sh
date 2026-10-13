@@ -1,160 +1,177 @@
 <script lang="ts">
+	import { Seo, FormattedDate } from '$lib';
 	import type { PageData } from './$types';
-	import { Seo, FormattedDate, introComplete, shouldAnimateFadeIn } from '$lib';
-	import { afterNavigate } from '$app/navigation';
-	import { browser } from '$app/environment';
-
 	let { data }: { data: PageData } = $props();
-
-	const WELCOME_LINES = ["Hey, I'm Theo.", 'Welcome to my lab.'];
-	const WELCOME_TEXT = WELCOME_LINES.join('\n');
-	const TYPING_SPEED = 70; // ms per character
-	const PUNCTUATION_PAUSE = 250; // extra pause after , or .
-	const LINE_END_PAUSE = 600; // pause at end of first line
-	const NEW_LINE_PAUSE = 400; // pause at start of new line
-	const INITIAL_DELAY = 1000; // cursor blink before typing
-	const POST_TYPING_DELAY = 500; // pause after typing
-
-	let typedText = $state('');
-	let showCursor = $state(true);
-	let isTyping = $state(false);
-	let introStarted = $state(false);
-	let skipped = false;
-
-	function sleep(ms: number): Promise<void> {
-		return new Promise((resolve) => {
-			if (skipped) return resolve();
-			setTimeout(resolve, ms);
-		});
-	}
-
-	function skipIntro(): void {
-		if (!isTyping) return;
-		skipped = true;
-		typedText = WELCOME_TEXT;
-		isTyping = false;
-		shouldAnimateFadeIn.set(true);
-		introComplete.set(true);
-	}
-
-	function handleKeydown(e: KeyboardEvent): void {
-		if (e.key === 'Escape' && isTyping) {
-			skipIntro();
-		}
-	}
-
-	async function runIntro(): Promise<void> {
-		if (introStarted) return;
-		introStarted = true;
-		isTyping = true;
-
-		// Phase 1: Just the blinking cursor for a second
-		await sleep(INITIAL_DELAY);
-
-		// Phase 2: Type out the welcome message
-		for (let i = 0; i <= WELCOME_TEXT.length; i++) {
-			if (skipped) return;
-			typedText = WELCOME_TEXT.slice(0, i);
-			const justTyped = WELCOME_TEXT[i - 1];
-			const nextChar = WELCOME_TEXT[i];
-			await sleep(TYPING_SPEED);
-			// Pause at end of line (before newline)
-			if (justTyped === '.' && nextChar === '\n') {
-				await sleep(LINE_END_PAUSE);
-			} else if (justTyped === '\n') {
-				// Pause at start of new line
-				await sleep(NEW_LINE_PAUSE);
-			} else if (justTyped === ',' || justTyped === '.') {
-				// Normal punctuation pause
-				await sleep(PUNCTUATION_PAUSE);
-			}
-		}
-
-		if (skipped) return;
-
-		// Phase 3: Short pause
-		await sleep(POST_TYPING_DELAY);
-
-		if (skipped) return;
-
-		// Phase 4: Complete intro - trigger fade in
-		isTyping = false;
-		shouldAnimateFadeIn.set(true);
-		introComplete.set(true);
-	}
-
-	afterNavigate(({ from }) => {
-		if (browser && from === null) {
-			// This is a fresh page load (not navigation from another page)
-			introComplete.set(false);
-			shouldAnimateFadeIn.set(false);
-			typedText = '';
-			runIntro();
-		} else {
-			// Navigation from another page - show full content immediately
-			typedText = WELCOME_TEXT;
-			introComplete.set(true);
-			shouldAnimateFadeIn.set(false);
-		}
-	});
 </script>
-
-<svelte:window onkeydown={handleKeydown} />
 
 <Seo url="https://gregory.sh" />
 
-<p class="welcome-text">
-	{#if isTyping || !$introComplete}
-		{typedText}
-	{:else}
-		{WELCOME_TEXT}
-	{/if}
-	{#if showCursor}
-		<span class="cursor"></span>
-	{/if}
-</p>
+<section class="intro">
+	<div class="intro-main">
+		<div class="portrait">
+			<img src="/theo.jpg" width="64" height="64" alt="Theo Gregory" />
+		</div>
+		<div class="intro-copy">
+			<h1>
+				Seven years building software for fintech and healthcare. Now I’m
+				learning to find what’s worth building.
+			</h1>
+			<p class="secondary">
+				Led engineering at Elephant Healthcare. Before that, Freetrade.
+				First-class M.Sci. in Computer Science.
+			</p>
+		</div>
+	</div>
+	<p class="link-row">
+		<span>Icebreaker:</span>
+		<a class="tap-link" href="/about"
+			>I nearly became an actor. Ask me about The IT Crowd →</a
+		>
+	</p>
+</section>
 
-<div class:invisible={!$introComplete} class:fade-in={$shouldAnimateFadeIn && $introComplete}>
-	<h2>Latest transmissions</h2>
+<section class="now-section" aria-labelledby="now-heading">
+	<div class="now-row">
+		<h2 id="now-heading" class="now-label"><span class="dot"></span>Now</h2>
+		<div class="now-copy">
+			<p class="lead">
+				Testing a few ideas with the people who’d use them, to find the one to
+				run at. Reading The Mom Test while I do it.
+			</p>
+			<a class="tap-link ideas-link" href="/ideas">All my ideas →</a>
+		</div>
+	</div>
+	<p class="link-row">
+		<span>More about me:</span>
+		<a class="tap-link" href="/about"
+			>My career, degree, and the acting years →</a
+		>
+	</p>
+</section>
 
-	{#if data.posts.length === 0}
-		<p>No posts yet. The Matrix is silent.</p>
-	{:else}
-		<ul class="post-list">
-			{#each data.posts as post}
-				<li class="post-item">
-					<span class="post-date"><FormattedDate datetime={post.date} /></span>
-					<h3 class="post-title">
-						<a href="/blog/{post.slug}">{post.title}</a>
-					</h3>
-					<p class="post-description">{post.description}</p>
-				</li>
-			{/each}
-		</ul>
-	{/if}
-</div>
+<section aria-labelledby="writing-heading">
+	<div class="section-heading">
+		<h2 id="writing-heading">Writing</h2>
+		<a class="tap-link" href="/blog">All writing →</a>
+	</div>
+	<ul class="post-list">
+		{#each data.posts.slice(0, 3) as post}
+			<li class="post-row">
+				<span class="label"><FormattedDate datetime={post.date} /></span>
+				<h3><a href="/blog/{post.slug}">{post.title}</a></h3>
+			</li>
+		{/each}
+	</ul>
+</section>
 
 <style>
-	.welcome-text {
-		margin: 0;
-		white-space: pre-line;
+	.intro,
+	.intro-main {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
 	}
-
-	.invisible {
-		opacity: 0;
-		pointer-events: none;
+	.intro-copy {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 	}
-
-	.fade-in {
-		animation: fadeIn 0.6s ease-out forwards;
+	h1 {
+		font-size: 22px;
+		line-height: 30px;
 	}
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
+	.portrait {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		position: relative;
+		flex-shrink: 0;
+		overflow: hidden;
+	}
+	.portrait::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 10%, transparent);
+	}
+	.portrait img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.link-row {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		font-size: 17px;
+		line-height: 26px;
+	}
+	.link-row > span {
+		color: var(--body);
+	}
+	.now-section {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+	}
+	.now-row {
+		display: grid;
+		gap: 2px;
+	}
+	.now-label {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		font: 500 13px/20px var(--font-mono);
+		color: var(--accent);
+	}
+	.dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--accent);
+	}
+	.ideas-link {
+		font-size: 17px;
+		line-height: 26px;
+	}
+	@media (min-width: 600px) {
+		.intro {
+			gap: 20px;
 		}
-		to {
-			opacity: 1;
+		.intro-main {
+			flex-direction: row;
+			gap: 20px;
+		}
+		.portrait {
+			width: 64px;
+			height: 64px;
+		}
+		h1 {
+			font-size: 26px;
+			line-height: 34px;
+		}
+		.link-row {
+			margin-left: 84px;
+			flex-direction: row;
+			gap: 5px;
+			align-items: baseline;
+		}
+		.link-row a {
+			display: inline;
+			min-height: 0;
+		}
+		.now-section {
+			gap: 24px;
+		}
+		.now-row {
+			grid-template-columns: 68px minmax(0, 496px);
+			gap: 16px;
+		}
+		.now-label {
+			height: 30px;
 		}
 	}
 </style>

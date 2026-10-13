@@ -1,5 +1,5 @@
 ---
-title: Inc's First Rewrite
+title: Inc’s first rewrite
 date: '2026-03-09T10:30:00+01:00'
 description: >-
   I threw away my first version of Inc over the weekend. The ideas were right —

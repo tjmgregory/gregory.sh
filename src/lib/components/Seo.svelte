@@ -13,9 +13,9 @@
 
 	const site = 'https://gregory.sh';
 	const siteName = 'gregory.sh';
-	const tagline = 'Building Startups with AI Agents';
+	const tagline = 'Learning what’s worth building';
 	const defaultDescription =
-		'Theo Gregory builds companies with AI agents. Ex-Head of Engineering sharing real lessons on AI-assisted development, solo startups, and shipping fast.';
+		'Seven years building software for fintech and healthcare. Now I’m learning to find what’s worth building.';
 
 	const author = {
 		name: 'Theo Gregory',
@@ -44,7 +44,7 @@
 	const isHomepage = $derived(url === site || url === `${site}/`);
 	const searchTitle = $derived(seoTitle ?? title);
 	const fullTitle = $derived(
-		searchTitle ? `${searchTitle} | ${author.name}` : `${author.name} — ${tagline}`
+		searchTitle ? `${searchTitle} | ${author.name}` : `${author.name} | ${tagline}`
 	);
 
 	// JSON-LD structured data

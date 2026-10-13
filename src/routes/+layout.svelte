@@ -1,18 +1,37 @@
 <script lang="ts">
 	import '../app.css';
-	import { NavSubscribe, NavContact, introComplete, shouldAnimateFadeIn } from '$lib';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { dev } from '$app/environment';
+	import Newsletter from '$lib/components/Newsletter.svelte';
+	import NavContact from '$lib/components/NavContact.svelte';
 
 	let { children } = $props();
-
-	// Only apply intro styling on homepage
-	let isHomepage = $derived($page.url.pathname === '/');
-	let duringIntro = $derived(isHomepage && !$introComplete);
-	let shouldAnimate = $derived(isHomepage && $shouldAnimateFadeIn && $introComplete);
+	const socials = [
+		['LinkedIn', 'https://linkedin.com/in/tjmgregory'],
+		['X', 'https://x.com/thgregory'],
+		['Threads', 'https://www.threads.com/@tjmgregory'],
+		['Bluesky', 'https://bsky.app/profile/tjmgregory.bsky.social'],
+		['Mastodon', 'https://mastodon.social/@tjmgregory'],
+		['GitHub', 'https://github.com/thgregory'],
+		['RSS', '/rss.xml']
+	];
 </script>
 
 <svelte:head>
+	<link
+		rel="preload"
+		href="/fonts/jetbrains-mono-400.woff2"
+		as="font"
+		type="font/woff2"
+		crossorigin="anonymous"
+	/>
+	<link
+		rel="preload"
+		href="/fonts/source-serif.woff2"
+		as="font"
+		type="font/woff2"
+		crossorigin="anonymous"
+	/>
 	{#if !dev}
 		<script
 			defer
@@ -24,79 +43,45 @@
 </svelte:head>
 
 <div class="container">
-	<header class="site-header" class:invisible={duringIntro} class:fade-in={shouldAnimate}>
-		<a href="/" class="site-title-link"><div class="site-title">gregory.sh</div></a>
-		<nav class="site-nav">
-			<div class="nav-left">
-				<a href="/blog">blog</a>
-				<NavContact />
-			</div>
-			<NavSubscribe />
+	<header class="site-header">
+		<a href="/" class="site-title">Theo Gregory</a>
+		<nav class="site-nav" aria-label="Main navigation">
+			<a
+				href="/ideas"
+				aria-current={page.url.pathname === '/ideas' ? 'page' : undefined}
+				>Ideas</a
+			>
+			<a
+				href="/blog"
+				aria-current={page.url.pathname.startsWith('/blog')
+					? 'page'
+					: undefined}>Writing</a
+			>
+			<a
+				href="/subscribe"
+				aria-current={page.url.pathname === '/subscribe' ? 'page' : undefined}
+				>Newsletter</a
+			>
 		</nav>
 	</header>
-
 	<main>
 		{@render children()}
+		{#if page.url.pathname !== '/subscribe' && page.url.pathname !== '/about'}
+			<Newsletter />
+		{/if}
 	</main>
-
-	<footer class="site-footer" class:invisible={duringIntro} class:fade-in={shouldAnimate}>
-		<a href="/privacy">privacy</a>
+	<footer class="site-footer">
+		<nav class="socials" aria-label="Social links">
+			{#each socials as [name, href]}
+				<a {href} rel={name === 'Mastodon' ? 'me' : undefined}>{name}</a>
+			{/each}
+		</nav>
+		<div class="footer-credit">
+			<span>Theo Gregory</span><span aria-hidden="true">·</span>
+			<a href="https://crafts.software">The Software Engineer Ltd</a><span
+				aria-hidden="true">·</span
+			>
+			<NavContact />
+		</div>
 	</footer>
 </div>
-
-<style>
-	.invisible {
-		opacity: 0;
-		pointer-events: none;
-	}
-
-	.fade-in {
-		animation: fadeIn 0.6s ease-out forwards;
-	}
-
-	@keyframes fadeIn {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
-	}
-
-	.site-title-link {
-		border-bottom: none;
-		text-decoration: none;
-	}
-
-	.site-title-link:hover {
-		text-shadow: none;
-	}
-
-	.site-title-link:hover .site-title {
-		text-shadow: 0 0 20px var(--matrix-green-glow);
-	}
-
-	.nav-left {
-		display: flex;
-		align-items: center;
-		gap: 1.5rem;
-	}
-
-	.site-footer {
-		margin-top: 4rem;
-		padding: 1rem 0;
-		border-top: 1px solid var(--matrix-green-dim);
-		text-align: center;
-		font-size: 0.8rem;
-	}
-
-	.site-footer a {
-		color: var(--matrix-green-dim);
-		border-bottom: none;
-	}
-
-	.site-footer a:hover {
-		color: var(--matrix-green);
-		text-shadow: none;
-	}
-</style>

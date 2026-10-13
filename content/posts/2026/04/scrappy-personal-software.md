@@ -1,5 +1,5 @@
 ---
-title: Open Source Is a Parts Bin
+title: Open source is a parts bin
 date: '2026-04-25T12:00:00+01:00'
 description: >-
   I forked Meetily this week and ripped its face off. When you stop pretending

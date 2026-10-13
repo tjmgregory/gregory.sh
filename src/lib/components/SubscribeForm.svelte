@@ -47,12 +47,14 @@
 
 <form onsubmit={handleSubmit} class="subscribe-form">
 	{#if status === 'success'}
-		<p class="success">{message}</p>
+		<p class="success" role="status">{message}</p>
 	{:else}
 		<input
 			type="email"
 			bind:value={email}
-			placeholder="your@email.com"
+			placeholder="Email address"
+			aria-label="Email address"
+			autocomplete="email"
 			required
 			disabled={status === 'loading'}
 		/>
@@ -69,9 +71,10 @@
 				message = 'Verification could not load. Please try again.';
 			}}
 			class="turnstile"
+			theme="auto"
 		/>
 		{#if status === 'error'}
-			<p class="error">{message}</p>
+			<p class="error" role="alert">{message}</p>
 		{/if}
 	{/if}
 </form>
@@ -80,47 +83,26 @@
 	.subscribe-form {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: 8px;
 		align-items: center;
 	}
-
+	input,
+	button {
+		width: 100%;
+	}
 	:global(.turnstile) {
 		flex-basis: 100%;
 		width: 100%;
 	}
-
-	input {
-		padding: 0.5rem 1rem;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		font-size: 1rem;
-	}
-
-	button {
-		padding: 0.5rem 1rem;
-		background: #333;
-		color: white;
-		border: none;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 1rem;
-	}
-
-	button:hover:not(:disabled) {
-		background: #555;
-	}
-
-	button:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.success {
-		color: green;
-	}
-
 	.error {
-		color: red;
 		width: 100%;
+	}
+	@media (min-width: 600px) {
+		input {
+			width: 320px;
+		}
+		button {
+			width: auto;
+		}
 	}
 </style>

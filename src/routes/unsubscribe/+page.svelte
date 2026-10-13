@@ -80,7 +80,10 @@
 
 		<!-- Real form submission, not fetch: the server's own response page
 		     (the confirmation a mail-client POST also gets) is what shows. -->
-		<form method="POST" action="/api/unsubscribe?token={encodeURIComponent(token)}">
+		<form
+			method="POST"
+			action="/api/unsubscribe?token={encodeURIComponent(token)}"
+		>
 			<button type="submit">Unsubscribe</button>
 		</form>
 	{:else if status === 'success'}
@@ -100,13 +103,16 @@
 			<input
 				type="email"
 				bind:value={email}
-				placeholder="your@email"
+				placeholder="Email address"
+				aria-label="Email address"
+				autocomplete="email"
 				required
 				disabled={status === 'loading'}
 			/>
 			<Turnstile
 				bind:this={turnstile}
 				siteKey={TURNSTILE_SITE_KEY}
+				theme="auto"
 				action={TURNSTILE_ACTIONS.unsubscribe}
 				onToken={(token) => (turnstileToken = token)}
 				onError={() => {
@@ -120,107 +126,31 @@
 		</form>
 
 		<p class="note">
-			Questions? <button class="email-link" onclick={handleContactClick} type="button">Contact me</button>
+			Questions? <button
+				class="text-button"
+				onclick={handleContactClick}
+				type="button">Contact me</button
+			>
 		</p>
 	{/if}
 </article>
 
 <style>
-	.unsubscribe {
-		max-width: 400px;
+	article > p {
+		margin-top: 16px;
 	}
-
 	form {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		margin: 2rem 0;
+		gap: 8px;
+		margin: 24px 0;
+		max-width: 448px;
 	}
-
-	input {
-		background: transparent;
-		border: 1px solid var(--matrix-green-dim);
-		color: var(--matrix-green);
-		font-family: var(--font-mono);
-		font-size: 1rem;
-		padding: 0.75rem 1rem;
-		outline: none;
-		transition: border-color 0.15s ease;
-	}
-
-	input:focus {
-		border-color: var(--matrix-green);
-	}
-
-	input::placeholder {
-		color: var(--matrix-green-dim);
-		opacity: 0.6;
-	}
-
-	button {
-		background: var(--matrix-green-dim);
-		border: none;
-		color: var(--matrix-black);
-		font-family: var(--font-mono);
-		font-size: 1rem;
-		padding: 0.75rem 1rem;
-		cursor: pointer;
-		transition: background 0.15s ease;
-	}
-
-	button:hover:not(:disabled) {
-		background: var(--matrix-green);
-	}
-
-	button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
 	.result {
-		margin: 2rem 0;
-		padding: 1.5rem;
-		border: 1px solid var(--matrix-green-dim);
+		margin: 24px 0;
 	}
-
-	.result p {
-		margin: 0;
-	}
-
-	.result.success {
-		border-color: var(--matrix-green);
-	}
-
-	.result.error {
-		border-color: #ff4141;
-	}
-
-	.result.error p {
-		color: #ff4141;
-	}
-
+	.result p + p,
 	.result button {
-		margin-top: 1rem;
-	}
-
-	.note {
-		color: var(--matrix-green-dim);
-		font-size: 0.85rem;
-	}
-
-	.email-link {
-		background: none;
-		border: none;
-		color: var(--matrix-green);
-		font-family: var(--font-mono);
-		font-size: inherit;
-		padding: 0;
-		cursor: pointer;
-		border-bottom: 1px solid var(--matrix-green-dim);
-		transition: text-shadow 0.2s ease;
-	}
-
-	.email-link:hover {
-		text-shadow: 0 0 10px var(--matrix-green-glow);
+		margin-top: 16px;
 	}
 </style>

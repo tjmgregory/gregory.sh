@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { error } from '@sveltejs/kit';
-	import { getPost } from '$lib/posts';
-	import { Seo, FormattedDate, ArticleSubscribeCta } from '$lib';
+	import { getPost, getPosts } from '$lib/posts';
+	import { Seo, FormattedDate } from '$lib';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -13,6 +13,11 @@
 		}
 		return p;
 	});
+	const morePosts = $derived(
+		getPosts()
+			.filter((other) => other.slug !== data.slug)
+			.slice(0, 2)
+	);
 </script>
 
 <Seo
@@ -29,8 +34,9 @@
 
 <article>
 	<header class="post-header">
+		<a class="mono tap-link" href="/blog">← Writing</a>
+		<p class="label"><FormattedDate datetime={post.date} format="full" /></p>
 		<h1>{post.title}</h1>
-		<p class="post-meta"><FormattedDate datetime={post.date} /></p>
 	</header>
 
 	<div class="post-content">
@@ -38,8 +44,17 @@
 	</div>
 </article>
 
-<ArticleSubscribeCta />
-
-<p style="margin-top: 2rem;">
-	<a href="/blog">← Back to archives</a>
-</p>
+<section class="more-writing" aria-labelledby="more-heading">
+	<div class="section-heading">
+		<h2 id="more-heading">More writing</h2>
+		<a class="tap-link" href="/blog">All writing →</a>
+	</div>
+	<ul class="post-list">
+		{#each morePosts as other}
+			<li class="post-row">
+				<span class="label"><FormattedDate datetime={other.date} /></span>
+				<h3><a href="/blog/{other.slug}">{other.title}</a></h3>
+			</li>
+		{/each}
+	</ul>
+</section>

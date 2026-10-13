@@ -17,6 +17,8 @@ export const GET: RequestHandler = async () => {
 
 	const pages: SitemapEntry[] = [
 		{ loc: '', priority: '1.0', changefreq: 'weekly' },
+		{ loc: '/ideas', priority: '0.8', changefreq: 'monthly' },
+		{ loc: '/about', priority: '0.6', changefreq: 'yearly' },
 		{ loc: '/blog', priority: '0.8', changefreq: 'weekly' },
 		{ loc: '/subscribe', priority: '0.5', changefreq: 'yearly' }
 	];

@@ -1,5 +1,5 @@
 ---
-title: Just Let Me Edit the Plan
+title: Just let me edit the plan
 date: '2026-05-22T12:00:00+01:00'
 description: >-
   After a few hours of reading agent plans in markdown, you stop reading them. A

@@ -10,7 +10,7 @@ import ini from 'refractor/ini';
 import javascript from 'refractor/javascript';
 import json from 'refractor/json';
 import jsx from 'refractor/jsx';
-import markdown from 'refractor/markdown';
+import markdownLanguage from 'refractor/markdown';
 import markup from 'refractor/markup';
 import python from 'refractor/python';
 import rust from 'refractor/rust';
@@ -36,7 +36,7 @@ import { visit } from 'unist-util-visit';
 // Grammars are built on first use, so a cold isolate pays only for what a post needs.
 const syntaxes = new Map<string, Syntax>();
 for (const syntax of [
-	bash, css, diff, docker, go, ini, javascript, json, jsx, markdown, markup,
+	bash, css, diff, docker, go, ini, javascript, json, jsx, markdownLanguage, markup,
 	python, rust, shellSession, sql, swift, toml, tsx, typescript, yaml
 ]) {
 	for (const name of [syntax.displayName, ...(syntax.aliases ?? [])]) syntaxes.set(name, syntax);
@@ -50,7 +50,7 @@ function grammarFor(language: string | undefined): string | undefined {
 }
 
 const smartypants = retext().use(retextSmartypants);
-// Smartypants changes nothing else, so other text skips the costly parse.
+// Text with none of these comes out of smartypants unchanged, so it skips the parse.
 const SMARTENS = /['"`]|--|\.\s*\./;
 
 // Per text node, as mdsvex did, so quotes next to inline markup turn the same way.

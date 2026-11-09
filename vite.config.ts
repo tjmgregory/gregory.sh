@@ -6,7 +6,7 @@ export default defineConfig({
 	server: {
 		fs: {
 			// Allow serving from main repo (for worktree node_modules access)
-			allow: ['content', '../..']
+			allow: ['../..']
 		}
 	}
 });

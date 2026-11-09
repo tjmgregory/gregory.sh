@@ -9,3 +9,7 @@ class_name = "HealthState"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["HealthState"]
+
+[[kv_namespaces]]
+binding = "POSTS"
+id = "posts-test"

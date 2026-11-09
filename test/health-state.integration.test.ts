@@ -5,9 +5,10 @@ import { GET as healthz } from '../src/routes/healthz/+server';
 import { POST as subscribe } from '../src/routes/api/subscribe/+server';
 import { GET as rssStats } from '../src/routes/api/rss-stats/+server';
 import { GET as rssXml } from '../src/routes/rss.xml/+server';
+import { load as loadPost } from '../src/routes/blog/[slug]/+page.server';
 
 declare global {
-	namespace Cloudflare { interface Env { HEALTH_STATE: DurableObjectNamespace } }
+	namespace Cloudflare { interface Env { HEALTH_STATE: DurableObjectNamespace; POSTS: KVNamespace } }
 }
 
 function request(path: string, body?: unknown) {
@@ -110,5 +111,32 @@ describe('Gregory health runtime', () => {
 		expect(healthyBody.checks['lists-subscribe'][0].status).toBe('pass');
 		expect(healthyBody.checks['lists-subscribe'][0].lastAttemptAt).not.toBeNull();
 		expect(success.status).toBe(200);
+	});
+
+	it('serves a KV post through the runtime renderer and records the posts datastore', async () => {
+		const post = { slug: 'kv-post', title: 'KV post', date: '2026-11-09T12:00:00+00:00', description: "It's in KV", markdown: 'It\'s [here](https://example.com).\n\n```\n{ "a": 1 }\n```\n' };
+		const { markdown: _markdown, ...summary } = post;
+		await env.POSTS.put(`post:${post.slug}`, JSON.stringify(post));
+		await env.POSTS.put('index', JSON.stringify([summary]));
+		const state = platform();
+		const data = await loadPost({ params: { slug: 'kv-post' }, platform: state.value, setHeaders: () => {} } as never) as { html: string };
+		const feed = await (await rssXml({ request: new Request('https://gregory.sh/rss.xml'), platform: state.value } as never)).text();
+		await Promise.all(state.pending);
+		const health = await healthz({ platform: state.value } as never);
+		const body = await health.json() as { checks: Record<string, Array<{ status: string }>> };
+		expect(data.html).toBe('<p>It’s <a href="https://example.com" rel="nofollow">here</a>.</p>\n<pre class="language-undefined"><code class="language-undefined">{ "a": 1 }</code></pre>');
+		expect(feed).toContain('<link>https://gregory.sh/blog/kv-post</link>');
+		expect(body.checks['posts-get'][0].status).toBe('pass');
+	});
+
+	it('fails healthz when reading posts from KV fails', async () => {
+		const state = platform();
+		const broken = { ...state.value, env: { ...state.value.env, POSTS: { get: async () => { throw new Error('KV GET failed: 500'); } } } } as unknown as App.Platform;
+		await expect(loadPost({ params: { slug: 'kv-post' }, platform: broken, setHeaders: () => {} } as never)).rejects.toThrow('KV GET failed');
+		await Promise.all(state.pending);
+		const health = await healthz({ platform: broken } as never);
+		const body = await health.json() as { checks: Record<string, Array<{ status: string; output?: string }>> };
+		expect(health.status).toBe(503);
+		expect(body.checks['posts-get'][0]).toMatchObject({ status: 'fail', output: 'KV GET failed: 500' });
 	});
 });

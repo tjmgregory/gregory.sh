@@ -16,10 +16,19 @@ script_name = "sentinel"
 binding = "RSS_STATS"
 id = "b5e8ae3e864349b989cf6b3df495a043"
 
+# Published blog posts. The newsroom writes them; see src/lib/server/posts.ts.
+[[kv_namespaces]]
+binding = "POSTS"
+id = "PREVIEW_POSTS_NAMESPACE_ID"
+
 # Preview deployments (non-main branches)
 [[env.preview.kv_namespaces]]
 binding = "RSS_STATS"
 id = "b5e8ae3e864349b989cf6b3df495a043"
+
+[[env.preview.kv_namespaces]]
+binding = "POSTS"
+id = "PREVIEW_POSTS_NAMESPACE_ID"
 
 [env.preview.vars]
 HEALTH_ENVIRONMENT = "preview"
@@ -34,6 +43,10 @@ script_name = "sentinel"
 [[env.production.kv_namespaces]]
 binding = "RSS_STATS"
 id = "84bc853c97ba476e836d88f7fdebfb4c"
+
+[[env.production.kv_namespaces]]
+binding = "POSTS"
+id = "PRODUCTION_POSTS_NAMESPACE_ID"
 
 [env.production.vars]
 HEALTH_ENVIRONMENT = "production"

@@ -3,7 +3,8 @@
 ## Status
 
 Superseded — SEO validation moved to the-newsroom pipeline (validate-blog-seo.sh).
-OG image generation (generate-og-images.ts) remains in gregory.sh.
+OG image generation (generate-og-images.ts) remains in gregory.sh, but it reads
+`content/posts`, which ADR-003 removed, so it finds no posts.
 
 ## Context
 

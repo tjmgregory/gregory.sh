@@ -1,5 +1,5 @@
-import { getPosts } from '$lib/posts';
 import { observeDatastore } from '$lib/health.server';
+import { loadPostList } from '$lib/server/posts';
 import { trackRssSubscriber } from '$lib/rss-stats';
 import type { RequestHandler } from './$types';
 
@@ -18,7 +18,7 @@ function escapeXml(text: string): string {
 }
 
 export const GET: RequestHandler = async ({ request, platform }) => {
-	const posts = getPosts();
+	const posts = await loadPostList(platform);
 
 	// Track subscriber (fire-and-forget)
 	const userAgent = request.headers.get('user-agent');

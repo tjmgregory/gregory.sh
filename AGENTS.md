@@ -4,8 +4,8 @@ Personal website and blog for building in public.
 
 ## Stack
 
-- **SvelteKit 5** + **mdsvex** for markdown blog posts
-- **Cloudflare Pages** for hosting (static)
+- **SvelteKit 5**, rendered on **Cloudflare Pages**
+- Blog posts are markdown in **Workers KV**, written by the newsroom and rendered at request time
 - **Cloudflare Workers + KV** for email capture (self-hosted, no external deps)
 - **TypeScript** throughout
 
@@ -17,37 +17,43 @@ src/
     +page.svelte          # Homepage
     blog/
       +page.svelte        # Blog index
-      [slug]/+page.svelte # Individual posts
+      [slug]/             # Individual posts, read from KV
     rss.xml/+server.ts    # RSS feed
     api/
       subscribe/+server.ts # Email capture endpoint
   lib/
-    posts.ts              # Post loading utilities
+    server/posts.ts       # Reads posts from the POSTS KV namespace
+    server/markdown.ts    # Renders post markdown to HTML
     newsroom/              # Client for the newsroom lists API (see below)
-content/
-  posts/<year>/<month>/   # Markdown blog posts, filed by year and month
 docs/
   unified-process/        # UP artefacts
 ```
 
-## Content
+## Posts
 
-Blog posts live in `content/posts/<year>/<month>/<slug>.md`, so a post dated 9 Feb 2026
-sits at `content/posts/2026/02/building-inc.md`. Each file has frontmatter:
+Posts are written and published in the newsroom, not in this repo. The newsroom
+writes each published post to the `POSTS` Workers KV namespace, and the site reads
+it at request time. There is no `content/` folder, and nothing here publishes a
+post. Decision record: `docs/unified-process/architecture/ADR-003-posts-from-kv.md`.
 
-```md
----
-title: Post Title
-date: 2026-02-09
-description: Brief description for SEO
-slug: post-slug
----
-
-Content here...
-```
-
-The public URL is `/blog/<slug>`. The slug comes from frontmatter, not the filename or
-the folder, so always set it.
+- `post:<slug>` holds `{slug, title, date, description, keywords, seoTitle,
+  ogImage, updated, markdown}`. `index` holds the same objects without
+  `markdown`, newest first. A post with no key is not published: its page is a
+  404 and it is in no list. The newsroom owns this shape; change it only with
+  the newsroom.
+- `src/lib/server/posts.ts` reads and checks the contract.
+  `src/lib/server/markdown.ts` renders the markdown and must keep giving the HTML
+  mdsvex gave (smart quotes, `rel="nofollow"` on absolute links, Prism classes on
+  code blocks).
+- Namespaces: `gregory-sh-posts` for production, `gregory-sh-posts-preview` for
+  preview deploys and local dev. The ids are in `wrangler.toml`.
+- Caching: KV reads use `cacheTtl: 30` and post pages send
+  `Cache-Control: public, max-age=0, s-maxage=30`, which adapter-cloudflare
+  keeps in the Cache API. A new or changed post shows within about a minute.
+  A request with `Cache-Control: no-cache` skips the page cache.
+- Local dev reads a local copy of the preview namespace, empty at first.
+  `bun run posts:pull` fills it (needs wrangler signed in, or
+  `CLOUDFLARE_API_TOKEN`, with read access to the preview namespace).
 
 ## Commands
 
@@ -57,6 +63,7 @@ bun run dev:port <port>  # Development server (REQUIRED: specify port)
 bun run build            # Build for production
 bun run preview          # Preview production build
 bun run check            # Type checking
+bun run posts:pull       # Copy the preview posts into local KV
 bun run test             # Run tests in watch mode
 bun run test:run         # Run tests once
 bun run newsroom:pull     # refreshes the pinned newsroom lists schema
@@ -126,9 +133,9 @@ Current phase: **Inception** (ready to move to Construction)
 
 ## Design Decisions
 
-- **Markdown in repo** over CMS — zero external deps, git-backed, fast
+- **Posts in the newsroom**, read from Workers KV at request time (ADR-003)
 - **Self-hosted email capture** over Buttondown — learning opportunity, full control
-- **Static generation** over SSR — fastest possible, SEO-first
+- **Short edge caches** over static generation, so a post shows within a minute of publishing
 - **Minimal MVP** — ship fast, iterate in public
 
 ## Email Protection

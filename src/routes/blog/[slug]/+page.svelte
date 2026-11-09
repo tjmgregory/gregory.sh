@@ -1,23 +1,11 @@
 <script lang="ts">
-	import { error } from '@sveltejs/kit';
-	import { getPost, getPosts } from '$lib/posts';
 	import { Seo, FormattedDate } from '$lib';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	const post = $derived.by(() => {
-		const p = getPost(data.slug);
-		if (!p) {
-			throw error(404, 'Post not found');
-		}
-		return p;
-	});
-	const morePosts = $derived(
-		getPosts()
-			.filter((other) => other.slug !== data.slug)
-			.slice(0, 2)
-	);
+	const post = $derived(data.post);
+	const morePosts = $derived(data.morePosts);
 </script>
 
 <Seo
@@ -28,7 +16,7 @@
 	type="article"
 	publishedTime={post.date}
 	modifiedTime={post.updated}
-	image={post.ogImage ? `https://gregory.sh${post.ogImage}` : undefined}
+	image={post.ogImage ? new URL(post.ogImage, 'https://gregory.sh').href : undefined}
 	keywords={post.keywords}
 />
 
@@ -40,7 +28,7 @@
 	</header>
 
 	<div class="post-content">
-		<post.content />
+		{@html data.html}
 	</div>
 </article>
 

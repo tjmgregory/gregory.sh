@@ -110,10 +110,10 @@ describe('loaders', () => {
 });
 
 describe('renderPost', () => {
-	it('renders markdown to the post HTML and re-renders when the markdown changes', () => {
-		expect(renderPost(older)).toBe(
+	it('renders markdown to the post HTML and re-renders when the markdown changes', async () => {
+		expect(await renderPost(older)).toBe(
 			'<p>Software is getting cheap. It’s <a href="/blog/inc">Inc</a>.</p>'
 		);
-		expect(renderPost({ ...older, markdown: 'Edited.\n' })).toBe('<p>Edited.</p>');
+		expect(await renderPost({ ...older, markdown: 'Edited.\n' })).toBe('<p>Edited.</p>');
 	});
 });

@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ params, platform, setHeaders }) => 
 	setHeaders({ 'cache-control': POSTS_CACHE_CONTROL });
 	return {
 		post: summaryOf(post),
-		html: renderPost(post),
+		html: await renderPost(post),
 		morePosts: posts.filter((other) => other.slug !== post.slug).slice(0, 2)
 	};
 };

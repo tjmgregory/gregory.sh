@@ -1,6 +1,5 @@
 /// <reference types="@cloudflare/workers-types" />
 import { observeDatastore } from '$lib/health.server';
-import { renderMarkdown } from './markdown';
 
 // Contract with the newsroom: docs/unified-process/architecture/ADR-003-posts-from-kv.md
 
@@ -121,10 +120,12 @@ export async function loadPostPage(
 const RENDER_CACHE_LIMIT = 100;
 const rendered = new Map<string, { markdown: string; html: string }>();
 
-export function renderPost(post: Post): string {
+// Imported here, not at the top, so pages that only list posts never load the renderer.
+export async function renderPost(post: Post): Promise<string> {
 	const cached = rendered.get(post.slug);
 	if (cached?.markdown === post.markdown) return cached.html;
 
+	const { renderMarkdown } = await import('./markdown');
 	const html = renderMarkdown(post.markdown);
 	if (!cached && rendered.size >= RENDER_CACHE_LIMIT) {
 		rendered.delete(rendered.keys().next().value as string);

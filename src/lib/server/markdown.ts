@@ -1,12 +1,13 @@
 import type { Element, ElementContent } from 'hast';
 import type { Code, Root } from 'mdast';
-import { refractor } from 'refractor/core';
+import { refractor, type Syntax } from 'refractor/core';
 import bash from 'refractor/bash';
 import css from 'refractor/css';
 import diff from 'refractor/diff';
 import docker from 'refractor/docker';
 import go from 'refractor/go';
 import ini from 'refractor/ini';
+import javascript from 'refractor/javascript';
 import json from 'refractor/json';
 import jsx from 'refractor/jsx';
 import markdown from 'refractor/markdown';
@@ -32,19 +33,31 @@ import { visit } from 'unist-util-visit';
 // Reproduces the HTML mdsvex built for posts when they lived in this repo.
 
 // The site styles no Prism tokens, so a language missing here only drops invisible spans.
-const languages = [
-	bash, css, diff, docker, go, ini, json, jsx, markdown, markup,
+// Grammars are built on first use, so a cold isolate pays only for what a post needs.
+const syntaxes = new Map<string, Syntax>();
+for (const syntax of [
+	bash, css, diff, docker, go, ini, javascript, json, jsx, markdown, markup,
 	python, rust, shellSession, sql, swift, toml, tsx, typescript, yaml
-];
-for (const language of languages) refractor.register(language);
+]) {
+	for (const name of [syntax.displayName, ...(syntax.aliases ?? [])]) syntaxes.set(name, syntax);
+}
+
+function grammarFor(language: string | undefined): string | undefined {
+	const syntax = language ? syntaxes.get(language) : undefined;
+	if (!syntax) return undefined;
+	refractor.register(syntax);
+	return language;
+}
 
 const smartypants = retext().use(retextSmartypants);
+// Smartypants changes nothing else, so other text skips the costly parse.
+const SMARTENS = /['"`]|--|\.\s*\./;
 
 // Per text node, as mdsvex did, so quotes next to inline markup turn the same way.
 function smartTypography() {
 	return (tree: Root) => {
 		visit(tree, 'text', (node) => {
-			node.value = String(smartypants.processSync(node.value));
+			if (SMARTENS.test(node.value)) node.value = String(smartypants.processSync(node.value));
 		});
 	};
 }
@@ -69,10 +82,10 @@ function codeBlock(_state: unknown, node: Code): Element {
 	const language = node.lang?.toLowerCase();
 	// mdsvex printed `language-undefined` for a fence with no language.
 	const className = [`language-${language}`];
-	const children: ElementContent[] =
-		language && refractor.registered(language)
-			? (refractor.highlight(node.value, language).children as ElementContent[])
-			: [{ type: 'text', value: node.value }];
+	const grammar = grammarFor(language);
+	const children: ElementContent[] = grammar
+		? (refractor.highlight(node.value, grammar).children as ElementContent[])
+		: [{ type: 'text', value: node.value }];
 	return {
 		type: 'element',
 		tagName: 'pre',

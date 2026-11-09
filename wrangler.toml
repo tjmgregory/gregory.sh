@@ -19,7 +19,7 @@ id = "b5e8ae3e864349b989cf6b3df495a043"
 # Published blog posts. The newsroom writes them; see src/lib/server/posts.ts.
 [[kv_namespaces]]
 binding = "POSTS"
-id = "PREVIEW_POSTS_NAMESPACE_ID"
+id = "118987406e9b4103848aef7823fda9ef"
 
 # Preview deployments (non-main branches)
 [[env.preview.kv_namespaces]]
@@ -28,7 +28,7 @@ id = "b5e8ae3e864349b989cf6b3df495a043"
 
 [[env.preview.kv_namespaces]]
 binding = "POSTS"
-id = "PREVIEW_POSTS_NAMESPACE_ID"
+id = "118987406e9b4103848aef7823fda9ef"
 
 [env.preview.vars]
 HEALTH_ENVIRONMENT = "preview"
@@ -46,7 +46,7 @@ id = "84bc853c97ba476e836d88f7fdebfb4c"
 
 [[env.production.kv_namespaces]]
 binding = "POSTS"
-id = "PRODUCTION_POSTS_NAMESPACE_ID"
+id = "3c0c1305e46c4375a82c0cd8922b175d"
 
 [env.production.vars]
 HEALTH_ENVIRONMENT = "production"

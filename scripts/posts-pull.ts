@@ -33,9 +33,11 @@ function wrangler(args: string[]): string {
 	return result.stdout;
 }
 
-// wrangler can print a notice line before the JSON it was asked for.
+// wrangler can print notice lines before and after the JSON it was asked for.
 function json<T>(output: string): T {
-	return JSON.parse(output.slice(output.search(/^[[{]/m)));
+	const start = output.search(/^[[{]/m);
+	const end = Math.max(output.lastIndexOf('}'), output.lastIndexOf(']'));
+	return JSON.parse(output.slice(start, end + 1));
 }
 
 function file(name: string, value: unknown): string {
@@ -54,10 +56,14 @@ try {
 	const pairs: { key: string; value: string }[] = [];
 	for (let start = 0; start < remoteKeys.length; start += 100) {
 		const chunk = remoteKeys.slice(start, start + 100);
-		const values = json<Record<string, { value: string }>>(
+		// Remote reads return the value itself; local reads wrap it as { value }.
+		const values = json<Record<string, string | { value: string }>>(
 			wrangler(['kv', 'bulk', 'get', file('keys.json', chunk), '--namespace-id', previewId, '--remote'])
 		);
-		for (const key of chunk) pairs.push({ key, value: values[key].value });
+		for (const key of chunk) {
+			const value = values[key];
+			pairs.push({ key, value: typeof value === 'string' ? value : value.value });
+		}
 	}
 
 	const stale = keys('--local', localId).filter((key) => !remoteKeys.includes(key));

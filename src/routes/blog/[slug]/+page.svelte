@@ -20,6 +20,12 @@
 	keywords={post.keywords}
 />
 
+<svelte:head>
+	{#if data.usesAssets}
+		<link rel="preconnect" href="https://assets.crafts.software" />
+	{/if}
+</svelte:head>
+
 <article>
 	<header class="post-header">
 		<a class="mono tap-link" href="/blog">← Writing</a>

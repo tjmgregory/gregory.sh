@@ -20,7 +20,7 @@
 <svelte:head>
 	<link
 		rel="preload"
-		href="/fonts/jetbrains-mono-400.woff2"
+		href="/fonts/jetbrains-mono.woff2"
 		as="font"
 		type="font/woff2"
 		crossorigin="anonymous"
@@ -33,6 +33,7 @@
 		crossorigin="anonymous"
 	/>
 	{#if !dev}
+		<link rel="preconnect" href="https://analytics.crafts.software" />
 		<script
 			defer
 			src="https://analytics.crafts.software/script.js"

@@ -1,4 +1,4 @@
-import type { Element, ElementContent } from 'hast';
+import type { Element, ElementContent, Root as HastRoot } from 'hast';
 import type { Code, Root } from 'mdast';
 import { refractor, type Syntax } from 'refractor/core';
 import bash from 'refractor/bash';
@@ -27,8 +27,9 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { retext } from 'retext';
 import retextSmartypants from 'retext-smartypants';
-import { unified } from 'unified';
+import { unified, type Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
+import { ASSETS_ORIGIN, type PostImage } from './posts';
 
 // Reproduces the HTML mdsvex built for posts when they lived in this repo.
 
@@ -94,14 +95,83 @@ function codeBlock(_state: unknown, node: Code): Element {
 	};
 }
 
+const STEPS = [480, 640, 960, 1280];
+const FALLBACK_STEP = 640;
+// The 640px content column (.container in app.css) less its 20px gutters on narrow screens.
+const SIZES = '(min-width: 680px) 640px, calc(100vw - 40px)';
+const EAGER_BLOCKS = 2;
+
+// The WAF rule on assets.crafts.software allows only these option strings; keep them in step.
+export function transformOptions(step: number): string {
+	return `width=${step},format=auto,metadata=none`;
+}
+
+function transformUrl(key: string, step: number): string {
+	return `${ASSETS_ORIGIN}cdn-cgi/image/${transformOptions(step)}/${key}`;
+}
+
+// Transforms never upscale: the first step at or past the intrinsic width is described at the intrinsic width.
+function candidates(intrinsic: number): { step: number; w: number }[] {
+	const list = [];
+	for (const step of STEPS) {
+		list.push({ step, w: Math.min(step, intrinsic) });
+		if (step >= intrinsic) break;
+	}
+	return list;
+}
+
+function sizedImage(img: Element, image: PostImage, eager: boolean) {
+	img.properties = {
+		...img.properties,
+		...(image.url.startsWith(ASSETS_ORIGIN) && responsiveSources(image)),
+		width: image.width,
+		height: image.height,
+		decoding: 'async',
+		loading: eager ? 'eager' : 'lazy',
+		...(eager && { fetchPriority: 'high' }),
+		...(image.color && { dataColor: image.color })
+	};
+}
+
+function responsiveSources(image: PostImage) {
+	const key = image.url.slice(ASSETS_ORIGIN.length);
+	const options = candidates(image.width);
+	const fallback = options.find((option) => option.step === FALLBACK_STEP) ?? options[options.length - 1];
+	return {
+		src: transformUrl(key, fallback.step),
+		srcSet: options.map(({ step, w }) => `${transformUrl(key, step)} ${w}w`).join(', '),
+		sizes: SIZES
+	};
+}
+
+function responsiveImages(): Transformer<HastRoot> {
+	return (tree, file) => {
+		const images = (file.data as { images?: PostImage[] }).images;
+		if (!images?.length) return;
+		const byUrl = new Map(images.map((image) => [image.url, image]));
+
+		// Root text nodes are the newlines between blocks; raw HTML blocks still count.
+		const blocks = tree.children.filter((node) => node.type !== 'text');
+		blocks.forEach((block, index) => {
+			if (block.type !== 'element') return;
+			visit(block, 'element', (node) => {
+				if (node.tagName !== 'img') return;
+				const image = byUrl.get(String(node.properties.src ?? ''));
+				if (image) sizedImage(node, image, index < EAGER_BLOCKS);
+			});
+		});
+	};
+}
+
 const processor = unified()
 	.use(remarkParse)
 	.use(remarkGfm)
 	.use(nofollowExternalLinks)
 	.use(smartTypography)
 	.use(remarkRehype, { allowDangerousHtml: true, handlers: { code: codeBlock } })
+	.use(responsiveImages)
 	.use(rehypeStringify, { allowDangerousHtml: true });
 
-export function renderMarkdown(markdown: string): string {
-	return String(processor.processSync(markdown));
+export function renderMarkdown(markdown: string, images?: PostImage[]): string {
+	return String(processor.processSync({ value: markdown, data: { images } }));
 }

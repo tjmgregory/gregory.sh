@@ -37,8 +37,9 @@ it at request time. There is no `content/` folder, and nothing here publishes a
 post. Decision record: `docs/unified-process/architecture/ADR-003-posts-from-kv.md`.
 
 - `post:<slug>` holds `{slug, title, date, description, keywords, seoTitle,
-  ogImage, updated, markdown}`. `index` holds the same objects without
-  `markdown`, newest first. A post with no key is not published: its page is a
+  ogImage, updated, markdown, images}`. `index` holds the same objects without
+  `markdown` and `images`, newest first. `images` (optional) gives each post
+  image's size, so the renderer can emit sized, lazy, responsive `<img>` tags. A post with no key is not published: its page is a
   404 and it is in no list. The newsroom owns this shape; change it only with
   the newsroom.
 - `src/lib/server/posts.ts` reads and checks the contract.

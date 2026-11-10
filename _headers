@@ -1,0 +1,12 @@
+# Font file names are not versioned: rename a font when it changes.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/theo.jpg
+  Cache-Control: public, max-age=86400
+
+/og-image.png
+  Cache-Control: public, max-age=86400
+
+/og/*
+  Cache-Control: public, max-age=86400

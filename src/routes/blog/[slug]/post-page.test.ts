@@ -1,6 +1,6 @@
 import { cleanup, render } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { middle, newer, older, postsKv } from '$lib/server/posts.fixtures';
+import { contract, middle, newer, older, postsKv } from '$lib/server/posts.fixtures';
 import { summaryOf } from '$lib/server/posts';
 
 vi.mock('$lib/health.server', () => ({
@@ -12,9 +12,9 @@ const { default: Page } = await import('./+page.svelte');
 
 type LoadEvent = Parameters<typeof load>[0];
 
-function event(slug: string) {
+function event(slug: string, entries?: Record<string, unknown>) {
 	const setHeaders = vi.fn();
-	const { kv } = postsKv();
+	const { kv } = postsKv(entries);
 	return {
 		setHeaders,
 		event: { params: { slug }, platform: { env: { POSTS: kv } }, setHeaders } as unknown as LoadEvent
@@ -42,17 +42,29 @@ describe('blog post load', () => {
 			'<p>Software is getting cheap. It’s <a href="/blog/inc">Inc</a>.</p>'
 		);
 		expect(data.morePosts).toEqual([summaryOf(newer), summaryOf(middle)]);
+		expect(data.usesAssets).toBe(false);
 		expect(setHeaders).toHaveBeenCalledWith({
 			'cache-control': 'public, max-age=0, s-maxage=30'
 		});
 	});
+
+	it('marks a post with an image on the assets host, and renders it sized', async () => {
+		const url = 'https://assets.crafts.software/2026/11/78d6f30807d8.jpg';
+		const post = { ...older, markdown: `![A desk](${url})\n`, images: [{ url, width: 2400, height: 1600 }] };
+		const { event: e } = event('building-inc', contract([post, newer]));
+		const data = (await load(e)) as Record<string, unknown>;
+
+		expect(data.usesAssets).toBe(true);
+		expect(data.html).toContain('width="2400" height="1600"');
+		expect(data.post).toEqual(summaryOf(older));
+	});
 });
 
 describe('blog post page', () => {
-	function renderPage(post: typeof older, morePosts = [summaryOf(newer)]) {
+	function renderPage(post: typeof older, morePosts = [summaryOf(newer)], usesAssets = false) {
 		return render(Page, {
 			props: {
-				data: { post: summaryOf(post), html: '<p>Rendered <em>body</em></p>', morePosts }
+				data: { post: summaryOf(post), html: '<p>Rendered <em>body</em></p>', morePosts, usesAssets }
 			} as never
 		});
 	}
@@ -76,6 +88,9 @@ describe('blog post page', () => {
 		expect(document.title).toBe(`${newer.seoTitle} | Theo Gregory`);
 		expect(meta('meta[property="article:published_time"]')).toBe(newer.date);
 		expect(meta('meta[property="og:image"]')).toBe('https://gregory.sh/og-image.png');
+		expect(meta('meta[property="og:image:width"]')).toBe('1200');
+		expect(meta('meta[property="og:image:height"]')).toBe('630');
+		expect(meta('meta[property="og:image:alt"]')).toBe('gregory.sh: Building Startups with AI Agents');
 		const jsonLd = JSON.parse(
 			document.head.querySelector('script[type="application/ld+json"]')?.textContent ?? '{}'
 		);
@@ -83,14 +98,33 @@ describe('blog post page', () => {
 			'@type': 'Article',
 			headline: newer.title,
 			datePublished: newer.date,
-			keywords: "parkinson's law"
+			keywords: "parkinson's law",
+			publisher: {
+				logo: { '@type': 'ImageObject', url: 'https://gregory.sh/apple-touch-icon.png', width: 180, height: 180 }
+			}
 		});
+	});
+
+	it('preconnects to the assets host only for a post with images there', () => {
+		renderPage(older);
+		expect(document.head.querySelector('link[rel="preconnect"]')).toBeNull();
+		cleanup();
+		document.head.innerHTML = '';
+
+		renderPage(older, [], true);
+		expect(document.head.querySelector('link[rel="preconnect"]')?.getAttribute('href')).toBe(
+			'https://assets.crafts.software'
+		);
 	});
 
 	it('uses an absolute ogImage as given and puts a path on gregory.sh', () => {
 		renderPage(middle);
 		expect(document.head.querySelector('meta[property="og:image"]')?.getAttribute('content')).toBe(
 			'https://assets.crafts.software/og/human-friendly-skill.png'
+		);
+		expect(document.head.querySelector('meta[property="og:image:width"]')).toBeNull();
+		expect(document.head.querySelector('meta[property="og:image:alt"]')?.getAttribute('content')).toBe(
+			middle.title
 		);
 		cleanup();
 		document.head.innerHTML = '';

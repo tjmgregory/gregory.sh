@@ -25,7 +25,14 @@
 	const publisher = {
 		name: siteName,
 		url: site,
-		logo: `${site}/logo.png`
+		logo: { url: `${site}/apple-touch-icon.png`, width: 180, height: 180 }
+	};
+
+	const defaultImage = {
+		url: `${site}/og-image.png`,
+		width: 1200,
+		height: 630,
+		alt: 'gregory.sh: Building Startups with AI Agents'
 	};
 
 	let {
@@ -33,7 +40,7 @@
 		seoTitle,
 		description = defaultDescription,
 		url = site,
-		image = `${site}/og-image.png`,
+		image = defaultImage.url,
 		type = 'website',
 		publishedTime,
 		modifiedTime,
@@ -46,6 +53,8 @@
 	const fullTitle = $derived(
 		searchTitle ? `${searchTitle} | ${author.name}` : `${author.name} | ${tagline}`
 	);
+	const isDefaultImage = $derived(image === defaultImage.url);
+	const imageAlt = $derived(isDefaultImage ? defaultImage.alt : (title ?? fullTitle));
 
 	// JSON-LD structured data
 	const jsonLd = $derived.by(() => {
@@ -73,7 +82,7 @@
 					url: publisher.url,
 					logo: {
 						'@type': 'ImageObject',
-						url: publisher.logo
+						...publisher.logo
 					}
 				},
 				mainEntityOfPage: {
@@ -128,6 +137,11 @@
 	<meta property="og:description" content={description} />
 	<meta property="og:url" content={url} />
 	<meta property="og:image" content={image} />
+	{#if isDefaultImage}
+		<meta property="og:image:width" content={String(defaultImage.width)} />
+		<meta property="og:image:height" content={String(defaultImage.height)} />
+	{/if}
+	<meta property="og:image:alt" content={imageAlt} />
 	{#if publishedTime}
 		<meta property="article:published_time" content={publishedTime} />
 	{/if}

@@ -7,13 +7,14 @@ const health = createHealthState({
 	operations: [
 		{ operation: 'rss-stats-get', kind: 'datastore', componentId: 'rss-stats', cadenceSeconds: null },
 		{ operation: 'rss-stats-put', kind: 'datastore', componentId: 'rss-stats', cadenceSeconds: null },
+		{ operation: 'posts-get', kind: 'datastore', componentId: 'posts', cadenceSeconds: null },
 		{ operation: 'lists-subscribe', kind: 'dependency', componentId: 'the-newsroom-lists', cadenceSeconds: 300 },
 		{ operation: 'lists-unsubscribe', kind: 'dependency', componentId: 'the-newsroom-lists', cadenceSeconds: 300 },
 		{ operation: 'turnstile-verify', kind: 'dependency', componentId: 'turnstile', cadenceSeconds: 300 }
 	]
 });
 
-export function observeDatastore<T>(platform: App.Platform | undefined, operation: 'rss-stats-get' | 'rss-stats-put', run: () => Promise<T>) {
+export function observeDatastore<T>(platform: App.Platform | undefined, operation: 'rss-stats-get' | 'rss-stats-put' | 'posts-get', run: () => Promise<T>) {
 	return health.observe(platform, operation, run);
 }
 
@@ -38,6 +39,7 @@ export async function observeTurnstile(platform: App.Platform | undefined, input
 
 export async function healthDocument(platform: App.Platform | undefined) {
 	if (!platform?.env?.RSS_STATS) throw new Error('RSS_STATS binding unavailable');
+	if (!platform?.env?.POSTS) throw new Error('POSTS binding unavailable');
 	if (!platform?.env?.HEALTH_STATE) throw new Error('HEALTH_STATE binding unavailable');
 	if (!platform?.env?.TURNSTILE_SECRET_KEY) throw new Error('TURNSTILE_SECRET_KEY unavailable');
 	if (!platform?.env?.NEWSROOM_LISTS_TOKEN) throw new Error('NEWSROOM_LISTS_TOKEN unavailable');

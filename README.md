@@ -4,8 +4,8 @@ Personal website and blog. Building in public.
 
 ## Stack
 
-- [SvelteKit](https://svelte.dev/) + [mdsvex](https://mdsvex.pngwn.io/) for markdown
-- [Cloudflare Pages](https://pages.cloudflare.com/) for hosting
+- [SvelteKit](https://svelte.dev/) on [Cloudflare Pages](https://pages.cloudflare.com/)
+- Blog posts read from [Workers KV](https://developers.cloudflare.com/kv/) and rendered at request time
 - Email capture through the newsroom's lists API
 
 ## Development
@@ -17,20 +17,16 @@ npm run dev
 
 ## Writing
 
-Add posts to `content/posts/<year>/<month>/<slug>.md`:
+Posts are written and published in the newsroom, which writes each published
+post to the `POSTS` Workers KV namespace. The site reads them at request time, so
+publishing, editing or unpublishing a post needs no change here. The URL is
+`/blog/<slug>`. See `docs/unified-process/architecture/ADR-003-posts-from-kv.md`.
 
-```md
----
-title: My Post
-date: 2026-02-09
-description: A brief description
-slug: my-post
----
+To see posts in local development, copy the preview namespace into local KV:
 
-Your content here...
+```bash
+bun run posts:pull
 ```
-
-The URL is `/blog/<slug>`, taken from frontmatter.
 
 ## Deployment
 

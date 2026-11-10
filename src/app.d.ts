@@ -5,6 +5,8 @@ declare global {
 			context?: { waitUntil(promise: Promise<unknown>): void };
 			env: {
 			RSS_STATS: KVNamespace;
+			/** Published blog posts, written by the newsroom. */
+			POSTS: KVNamespace;
 			HEALTH_STATE: DurableObjectNamespace;
 			HEALTH_ENVIRONMENT?: 'local' | 'preview' | 'production';
 			CF_PAGES_COMMIT_SHA?: string;
@@ -40,13 +42,6 @@ declare global {
 		'expired-callback': () => void;
 		'error-callback': () => void;
 	}
-}
-
-declare module '*.md' {
-	import type { Component } from 'svelte';
-	const component: Component;
-	export default component;
-	export const metadata: Record<string, unknown>;
 }
 
 export {};

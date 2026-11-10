@@ -1,4 +1,4 @@
-import { getPosts } from '$lib/posts';
+import { loadPostList, POSTS_CACHE_CONTROL } from '$lib/server/posts';
 import type { RequestHandler } from './$types';
 
 const site = 'https://gregory.sh';
@@ -10,10 +10,8 @@ interface SitemapEntry {
 	lastmod?: string;
 }
 
-export const prerender = true;
-
-export const GET: RequestHandler = async () => {
-	const posts = getPosts();
+export const GET: RequestHandler = async ({ platform }) => {
+	const posts = await loadPostList(platform);
 
 	const pages: SitemapEntry[] = [
 		{ loc: '', priority: '1.0', changefreq: 'weekly' },
@@ -48,7 +46,7 @@ ${allEntries
 	return new Response(xml, {
 		headers: {
 			'Content-Type': 'application/xml',
-			'Cache-Control': 'max-age=3600'
+			'Cache-Control': POSTS_CACHE_CONTROL
 		}
 	});
 };

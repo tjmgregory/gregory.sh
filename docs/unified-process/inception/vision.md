@@ -23,7 +23,7 @@ For **Theo Gregory**, who wants to share learnings, projects, and thinking publi
 | G-004.1 | Ship v0.1 fast | Live on gregory.sh within 1 week |
 | G-004.2 | Ultra-fast performance | Lighthouse 100/100 |
 | G-004.3 | SEO-first | Proper meta tags, structured data, sitemap |
-| G-004.4 | Low-friction publishing | Write markdown, push, done |
+| G-004.4 | Low-friction publishing | Publish from the newsroom, no deploy (ADR-003) |
 | G-004.5 | Email capture | Collect subscribers for newsletter |
 | G-004.6 | RSS feed | Standard feed for readers who prefer RSS |
 | G-004.7 | Automated SEO | AI-powered SEO generation and optimization at build time |
@@ -51,10 +51,10 @@ For **Theo Gregory**, who wants to share learnings, projects, and thinking publi
 ## G-007: Technical Constraints
 
 - **SvelteKit** with static adapter for Cloudflare Pages
-- **mdsvex** for markdown processing
+- Markdown rendered at request time (ADR-003)
 - **Cloudflare** for hosting, Workers, KV
 - No external runtime dependencies (database, CMS, etc.)
-- Content lives in git as markdown files
+- Posts live in the newsroom; the site reads published posts from Workers KV (ADR-003)
 
 ## G-008: Risks
 

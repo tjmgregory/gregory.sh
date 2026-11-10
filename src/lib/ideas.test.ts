@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { globSync } from 'node:fs';
-import matter from 'gray-matter';
-import { ideas, ideaGroups, workTools } from './ideas';
+import { ideas, ideaGroups } from './ideas';
 
 describe('ideas catalogue', () => {
 	it('keeps a complete, unique entry in a known group for each idea', () => {
@@ -18,13 +15,6 @@ describe('ideas catalogue', () => {
 				expect(idea.link.label.trim()).not.toBe('');
 			}
 		}
-	});
-
-	it('links work tools to published frontmatter slugs', () => {
-		const slugs = globSync('content/posts/**/*.md').map(
-			(path) => matter(readFileSync(path, 'utf8')).data.slug
-		);
-		for (const tool of workTools) expect(slugs).toContain(tool.slug);
 	});
 
 	it('keeps the public beta destination and avoids invented links for research ideas', () => {

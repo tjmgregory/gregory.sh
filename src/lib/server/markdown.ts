@@ -29,7 +29,7 @@ import { retext } from 'retext';
 import retextSmartypants from 'retext-smartypants';
 import { unified, type Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import { ASSETS_ORIGIN, type PostImage } from './posts';
+import { ASSETS_ORIGIN, type PostImage, type PostVideo } from './posts';
 
 // Reproduces the HTML mdsvex built for posts when they lived in this repo.
 
@@ -100,6 +100,8 @@ const FALLBACK_STEP = 640;
 // The 640px content column (.container in app.css) less its 20px gutters on narrow screens.
 const SIZES = '(min-width: 680px) 640px, calc(100vw - 40px)';
 const EAGER_BLOCKS = 2;
+// Twice the 640px column. Transforms never upscale, so a smaller poster comes back at its own size.
+const POSTER_STEP = 1280;
 
 // The WAF rule on assets.crafts.software allows only these option strings; keep them in step.
 export function transformOptions(step: number): string {
@@ -144,11 +146,35 @@ function responsiveSources(image: PostImage) {
 	};
 }
 
-function responsiveImages(): Transformer<HastRoot> {
+// Transforms answer 415 for an mp4, so only the poster goes through cdn-cgi.
+function videoPlayer(node: Element, video: PostVideo) {
+	const alt = video.alt ?? String(node.properties.alt ?? '');
+	const poster = video.poster.startsWith(ASSETS_ORIGIN)
+		? transformUrl(video.poster.slice(ASSETS_ORIGIN.length), POSTER_STEP)
+		: video.poster;
+	node.tagName = 'video';
+	node.properties = {
+		controls: true,
+		playsInline: true,
+		preload: 'metadata',
+		poster,
+		width: video.width,
+		height: video.height,
+		...(video.color && { dataColor: video.color }),
+		...(alt && { ariaLabel: alt })
+	};
+	node.children = [
+		{ type: 'element', tagName: 'source', properties: { src: video.url, type: 'video/mp4' }, children: [] },
+		{ type: 'element', tagName: 'a', properties: { href: video.url }, children: [{ type: 'text', value: alt || video.url }] }
+	];
+}
+
+function postMedia(): Transformer<HastRoot> {
 	return (tree, file) => {
-		const images = (file.data as { images?: PostImage[] }).images;
-		if (!images?.length) return;
-		const byUrl = new Map(images.map((image) => [image.url, image]));
+		const { images, videos } = file.data as { images?: PostImage[]; videos?: PostVideo[] };
+		if (!images?.length && !videos?.length) return;
+		const imagesByUrl = new Map((images ?? []).map((image) => [image.url, image]));
+		const videosByUrl = new Map((videos ?? []).map((video) => [video.url, video]));
 
 		// Root text nodes are the newlines between blocks; raw HTML blocks still count.
 		const blocks = tree.children.filter((node) => node.type !== 'text');
@@ -156,7 +182,10 @@ function responsiveImages(): Transformer<HastRoot> {
 			if (block.type !== 'element') return;
 			visit(block, 'element', (node) => {
 				if (node.tagName !== 'img') return;
-				const image = byUrl.get(String(node.properties.src ?? ''));
+				const src = String(node.properties.src ?? '');
+				const video = videosByUrl.get(src);
+				if (video) return videoPlayer(node, video);
+				const image = imagesByUrl.get(src);
 				if (image) sizedImage(node, image, index < EAGER_BLOCKS);
 			});
 		});
@@ -169,9 +198,9 @@ const processor = unified()
 	.use(nofollowExternalLinks)
 	.use(smartTypography)
 	.use(remarkRehype, { allowDangerousHtml: true, handlers: { code: codeBlock } })
-	.use(responsiveImages)
+	.use(postMedia)
 	.use(rehypeStringify, { allowDangerousHtml: true });
 
-export function renderMarkdown(markdown: string, images?: PostImage[]): string {
-	return String(processor.processSync({ value: markdown, data: { images } }));
+export function renderMarkdown(markdown: string, images?: PostImage[], videos?: PostVideo[]): string {
+	return String(processor.processSync({ value: markdown, data: { images, videos } }));
 }

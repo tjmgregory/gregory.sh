@@ -19,8 +19,8 @@ request time.
 - Binding `POSTS`. Namespace `gregory-sh-posts` for production,
   `gregory-sh-posts-preview` for preview deploys and local dev.
 - `post:<slug>` holds
-  `{slug, title, date, description, keywords, seoTitle, ogImage, updated, markdown, images}`.
-  `index` holds the same objects without `markdown` and `images`, newest first.
+  `{slug, title, date, description, keywords, seoTitle, ogImage, updated, images, videos, markdown}`.
+  `index` holds the same objects without `markdown`, `images` and `videos`, newest first.
   KV holds published posts only, so a missing key is a 404.
 - `images` is optional: `[{url, width, height, color, alt}]`, one entry per
   image the markdown shows. `url` is the original exactly as the markdown has it
@@ -28,6 +28,13 @@ request time.
   `height` are the displayed pixels after EXIF orientation. `color` is
   `#rrggbb` and may be absent. A malformed entry, or a malformed `color`, is
   dropped and logged; the post still renders.
+- `videos` is optional: `[{url, poster, width, height, color, durationMs, alt}]`,
+  one entry per video the markdown shows. The markdown shows a video as an
+  image, `![alt](<url>)`. `url` is an H.264/AAC MP4 at
+  `https://assets.crafts.software/<key>.mp4` and `poster` a JPEG of the same
+  size. `color` is the poster's average colour and `durationMs` a positive
+  integer; either may be absent. An entry without `url`, `poster`, `width` or
+  `height` is dropped and logged; a malformed optional field is dropped.
 - `markdown` is plain markdown with every newsroom token already expanded.
 - `ogImage` is an absolute URL, or a path to a file in this repo's `static/`.
 - The site renders the markdown at runtime with remark and rehype, set up to
@@ -48,8 +55,18 @@ request time.
   `assets.crafts.software` lets through, so they change only together with that
   rule. `color` goes on the element as `data-color` and is not styled yet.
   Images with no entry, and raw HTML images, render as plain `<img src alt>`.
-- Each isolate keeps the rendered HTML for a post until its markdown or its
-  images change.
+- A markdown image whose URL has a `videos` entry becomes, in the same `<p>`,
+  `<video controls playsinline preload="metadata" poster width height data-color aria-label>`
+  with a `<source src="<url>" type="video/mp4">` and a link to the MP4 as its
+  fallback. A poster on `assets.crafts.software` is served through
+  `width=1280,format=auto,metadata=none`, one of the four allowed option
+  strings. The MP4 is never sent through a transform (transforms answer 415 for
+  video). `aria-label` is the entry's `alt`, else the markdown alt. Videos get
+  the same `max-width: 100%; height: auto` as images and no other styling yet.
+- The site sends no Content-Security-Policy, so media from
+  `assets.crafts.software` needs no policy change.
+- Each isolate keeps the rendered HTML for a post until its markdown, its
+  images or its videos change.
 - KV reads use `cacheTtl: 30`, the minimum. Pages that show posts send
   `Cache-Control: public, max-age=0, s-maxage=30`. adapter-cloudflare stores
   those responses in the data centre's Cache API. Together a new, changed or

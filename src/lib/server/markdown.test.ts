@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderMarkdown, transformOptions } from './markdown';
-import type { PostImage } from './posts';
+import type { PostImage, PostVideo } from './posts';
 
 describe('renderMarkdown', () => {
 	it('sets smart quotes, apostrophes, dashes and ellipses in prose', () => {
@@ -147,5 +147,69 @@ describe('renderMarkdown with post images', () => {
 		const markdown = `![a](${other})\n\n![c](/img/c.png)\n\n<img src="${url}" alt="raw">`;
 		expect(renderMarkdown(markdown, [photo])).toBe(renderMarkdown(markdown));
 		expect(renderMarkdown(markdown, [photo])).toContain(`<p><img src="${other}" alt="a"></p>`);
+	});
+});
+
+describe('renderMarkdown with post videos', () => {
+	const mp4 = 'https://assets.crafts.software/2026/11/0a1b2c3d4e5f.mp4';
+	const jpg = 'https://assets.crafts.software/2026/11/0a1b2c3d4e5f.jpg';
+	const posterVariant = 'https://assets.crafts.software/cdn-cgi/image/width=1280,format=auto,metadata=none/2026/11/0a1b2c3d4e5f.jpg';
+	const clip: PostVideo = { url: mp4, poster: jpg, width: 1280, height: 720, color: '#1a2b3c', durationMs: 4200, alt: 'The notch swinging' };
+
+	function video(html: string): HTMLVideoElement {
+		return new DOMParser().parseFromString(html, 'text/html').querySelector('video') as HTMLVideoElement;
+	}
+
+	it('turns a known video into a player in the paragraph the image sat in', () => {
+		expect(renderMarkdown(`Intro.\n\n![The notch swinging](${mp4})`, undefined, [clip])).toBe(
+			'<p>Intro.</p>\n' +
+				`<p><video controls playsinline preload="metadata" poster="${posterVariant}" width="1280" height="720" data-color="#1a2b3c" aria-label="The notch swinging">` +
+				`<source src="${mp4}" type="video/mp4"><a href="${mp4}">The notch swinging</a></video></p>`
+		);
+	});
+
+	it('never sends the mp4 through a transform, and keeps the poster to an allowed option string', () => {
+		const player = video(renderMarkdown(`![x](${mp4})`, undefined, [clip]));
+		expect(player.querySelector('source')?.getAttribute('src')).toBe(mp4);
+		expect(player.getAttribute('poster')).toBe(posterVariant);
+		expect(player.hasAttribute('src')).toBe(false);
+		expect(player.hasAttribute('alt')).toBe(false);
+		expect(player.hasAttribute('loading')).toBe(false);
+	});
+
+	it('uses the markdown alt when the entry has none, and drops the label when both are empty', () => {
+		const { alt: _alt, ...unlabelled } = clip;
+		expect(video(renderMarkdown(`![From markdown](${mp4})`, undefined, [unlabelled])).getAttribute('aria-label')).toBe(
+			'From markdown'
+		);
+		const bare = video(renderMarkdown(`![](${mp4})`, undefined, [unlabelled]));
+		expect(bare.hasAttribute('aria-label')).toBe(false);
+		expect(bare.querySelector('a')?.textContent).toBe(mp4);
+	});
+
+	it('leaves the data-color off when the entry has no colour', () => {
+		const { color: _color, ...plain } = clip;
+		expect(video(renderMarkdown(`![x](${mp4})`, undefined, [plain])).hasAttribute('data-color')).toBe(false);
+	});
+
+	it('uses a poster on another host as given', () => {
+		const poster = 'https://example.com/poster.jpg';
+		expect(video(renderMarkdown(`![x](${mp4})`, undefined, [{ ...clip, poster }])).getAttribute('poster')).toBe(poster);
+	});
+
+	it('renders photos and videos in the same post, each from its own list', () => {
+		const key = '2026/11/ab12cd34ef56.jpg';
+		const photo: PostImage = { url: `https://assets.crafts.software/${key}`, width: 800, height: 600 };
+		const html = renderMarkdown(`![a](${photo.url})\n\n![b](${mp4})`, [photo], [clip]);
+		const doc = new DOMParser().parseFromString(html, 'text/html');
+		expect(doc.querySelectorAll('img')).toHaveLength(1);
+		expect(doc.querySelector('img')?.getAttribute('srcset')).toContain(key);
+		expect(doc.querySelectorAll('video')).toHaveLength(1);
+	});
+
+	it('renders an mp4 image with no videos entry as before', () => {
+		const markdown = `![b](${mp4})`;
+		expect(renderMarkdown(markdown, undefined, [])).toBe(renderMarkdown(markdown));
+		expect(renderMarkdown(markdown)).toBe(`<p><img src="${mp4}" alt="b"></p>`);
 	});
 });

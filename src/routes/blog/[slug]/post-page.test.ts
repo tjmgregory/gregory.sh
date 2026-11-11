@@ -58,6 +58,18 @@ describe('blog post load', () => {
 		expect(data.html).toContain('width="2400" height="1600"');
 		expect(data.post).toEqual(summaryOf(older));
 	});
+
+	it('marks a post with a video on the assets host, and renders the player', async () => {
+		const url = 'https://assets.crafts.software/2026/11/0a1b2c3d4e5f.mp4';
+		const poster = 'https://assets.crafts.software/2026/11/0a1b2c3d4e5f.jpg';
+		const post = { ...older, markdown: `![A clip](${url})\n`, videos: [{ url, poster, width: 720, height: 1280 }] };
+		const { event: e } = event('building-inc', contract([post, newer]));
+		const data = (await load(e)) as Record<string, unknown>;
+
+		expect(data.usesAssets).toBe(true);
+		expect(data.html).toContain(`<source src="${url}" type="video/mp4">`);
+		expect(data.post).toEqual(summaryOf(older));
+	});
 });
 
 describe('blog post page', () => {

@@ -22,9 +22,20 @@ export interface PostImage {
 	alt?: string;
 }
 
+export interface PostVideo {
+	url: string;
+	poster: string;
+	width: number;
+	height: number;
+	color?: string;
+	durationMs?: number;
+	alt?: string;
+}
+
 export interface Post extends PostSummary {
 	markdown: string;
 	images?: PostImage[];
+	videos?: PostVideo[];
 }
 
 // KV's minimum. With the 30s page cache, a new post shows within about a minute.
@@ -93,19 +104,35 @@ function toImage(value: unknown): PostImage | null {
 	};
 }
 
-function toImages(value: unknown, slug: string): PostImage[] | undefined {
+function toVideo(value: unknown): PostVideo | null {
+	if (typeof value !== 'object' || value === null) return null;
+	const { url, poster, width, height, color, durationMs, alt } = value as Record<string, unknown>;
+	if (typeof url !== 'string' || url === '' || typeof poster !== 'string' || poster === '') return null;
+	if (!isPixels(width) || !isPixels(height)) return null;
+	return {
+		url,
+		poster,
+		width,
+		height,
+		...(typeof color === 'string' && HEX_COLOR.test(color) && { color }),
+		...(Number.isInteger(durationMs) && (durationMs as number) > 0 && { durationMs: durationMs as number }),
+		...(typeof alt === 'string' && { alt })
+	};
+}
+
+function toList<T>(value: unknown, slug: string, field: string, parse: (entry: unknown) => T | null): T[] | undefined {
 	if (value === undefined || value === null) return undefined;
 	if (!Array.isArray(value)) {
-		console.error(`Ignoring "images" on post:${slug}: not an array`, value);
+		console.error(`Ignoring "${field}" on post:${slug}: not an array`, value);
 		return undefined;
 	}
-	const images: PostImage[] = [];
+	const list: T[] = [];
 	for (const entry of value) {
-		const image = toImage(entry);
-		if (image) images.push(image);
-		else console.error(`Skipping an image on post:${slug} that does not match the contract`, entry);
+		const item = parse(entry);
+		if (item) list.push(item);
+		else console.error(`Skipping an entry in "${field}" on post:${slug} that does not match the contract`, entry);
 	}
-	return images.length ? images : undefined;
+	return list.length ? list : undefined;
 }
 
 function newestFirst(a: PostSummary, b: PostSummary): number {
@@ -137,8 +164,10 @@ export async function readPost(kv: KVNamespace, slug: string): Promise<Post | nu
 	if (!summary || summary.slug !== slug || typeof markdown !== 'string') {
 		throw new Error(`KV "post:${slug}" does not match the posts contract`);
 	}
-	const images = toImages((value as { images?: unknown }).images, slug);
-	return { ...summary, markdown, ...(images && { images }) };
+	const media = value as { images?: unknown; videos?: unknown };
+	const images = toList(media.images, slug, 'images', toImage);
+	const videos = toList(media.videos, slug, 'videos', toVideo);
+	return { ...summary, markdown, ...(images && { images }), ...(videos && { videos }) };
 }
 
 function postsNamespace(platform: App.Platform | undefined): KVNamespace {
@@ -164,23 +193,31 @@ export async function loadPostPage(
 }
 
 const RENDER_CACHE_LIMIT = 100;
-const rendered = new Map<string, { markdown: string; images: string; html: string }>();
+const rendered = new Map<string, { markdown: string; media: string; html: string }>();
 
 // Imported here, not at the top, so pages that only list posts never load the renderer.
 export async function renderPost(post: Post): Promise<string> {
-	const images = JSON.stringify(post.images ?? []);
+	const media = JSON.stringify([post.images ?? [], post.videos ?? []]);
 	const cached = rendered.get(post.slug);
-	if (cached?.markdown === post.markdown && cached.images === images) return cached.html;
+	if (cached?.markdown === post.markdown && cached.media === media) return cached.html;
 
 	const { renderMarkdown } = await import('./markdown');
-	const html = renderMarkdown(post.markdown, post.images);
+	const html = renderMarkdown(post.markdown, post.images, post.videos);
 	if (!cached && rendered.size >= RENDER_CACHE_LIMIT) {
 		rendered.delete(rendered.keys().next().value as string);
 	}
-	rendered.set(post.slug, { markdown: post.markdown, images, html });
+	rendered.set(post.slug, { markdown: post.markdown, media, html });
 	return html;
 }
 
-export function summaryOf({ markdown: _markdown, images: _images, ...summary }: Post): PostSummary {
+export function summaryOf({ markdown: _markdown, images: _images, videos: _videos, ...summary }: Post): PostSummary {
 	return summary;
+}
+
+export function usesAssets(post: Post): boolean {
+	const urls = [
+		...(post.images ?? []).map((image) => image.url),
+		...(post.videos ?? []).flatMap((video) => [video.url, video.poster])
+	];
+	return urls.some((url) => url.startsWith(ASSETS_ORIGIN));
 }

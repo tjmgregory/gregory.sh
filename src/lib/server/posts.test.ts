@@ -6,7 +6,7 @@ const observeDatastore = vi.hoisted(() =>
 );
 vi.mock('$lib/health.server', () => ({ observeDatastore }));
 
-const { listPosts, loadPostList, loadPostPage, readPost, renderPost, summaryOf } = await import(
+const { listPosts, loadPostList, loadPostPage, readPost, renderPost, summaryOf, usesAssets } = await import(
 	'./posts'
 );
 
@@ -112,6 +112,69 @@ describe('readPost', () => {
 	});
 });
 
+describe('readPost videos', () => {
+	const video = {
+		url: 'https://assets.crafts.software/2026/11/a.mp4',
+		poster: 'https://assets.crafts.software/2026/11/a.jpg',
+		width: 1280,
+		height: 720
+	};
+
+	it('reads videos, keeping only contract fields', async () => {
+		const full = { ...video, color: '#1A2B3C', durationMs: 4200, alt: 'A clip' };
+		const { kv } = postsKv({ 'post:building-inc': { ...older, videos: [{ ...full, extra: 1 }] } });
+		expect(await readPost(kv, 'building-inc')).toEqual({ ...older, videos: [full] });
+	});
+
+	it('reads a record without videos exactly as before', async () => {
+		const { kv } = postsKv({ 'post:building-inc': { ...older, videos: null } });
+		expect(await readPost(kv, 'building-inc')).toEqual(older);
+	});
+
+	it('drops bad videos and bad optional fields, and keeps the post', async () => {
+		vi.mocked(console.error).mockClear();
+		const { kv } = postsKv({
+			'post:building-inc': {
+				...older,
+				videos: [
+					video,
+					{ ...video, poster: '' },
+					{ ...video, poster: undefined },
+					{ ...video, url: 3 },
+					{ ...video, width: 0 },
+					{ ...video, height: 2.5 },
+					null
+				]
+			},
+			'post:no-array': { ...older, slug: 'no-array', videos: { url: video.url } },
+			'post:bad-fields': {
+				...older,
+				slug: 'bad-fields',
+				videos: [{ ...video, color: 'red', durationMs: -1, alt: false }]
+			}
+		});
+		expect((await readPost(kv, 'building-inc'))?.videos).toEqual([video]);
+		expect(await readPost(kv, 'no-array')).toEqual({ ...older, slug: 'no-array' });
+		expect((await readPost(kv, 'bad-fields'))?.videos).toEqual([video]);
+		const logged = vi.mocked(console.error).mock.calls.map(([message]) => String(message));
+		expect(logged.filter((message) => message.includes('post:building-inc'))).toHaveLength(6);
+		expect(logged.filter((message) => message.includes('post:no-array'))).toHaveLength(1);
+	});
+});
+
+describe('usesAssets', () => {
+	const asset = (name: string) => `https://assets.crafts.software/2026/11/${name}`;
+
+	it('is true when an image, a video or a poster is on the assets host', () => {
+		expect(usesAssets(older)).toBe(false);
+		expect(usesAssets({ ...older, images: [{ url: asset('a.jpg'), width: 1, height: 1 }] })).toBe(true);
+		const video = { url: 'https://example.com/a.mp4', poster: 'https://example.com/a.jpg', width: 1, height: 1 };
+		expect(usesAssets({ ...older, videos: [video] })).toBe(false);
+		expect(usesAssets({ ...older, videos: [{ ...video, url: asset('a.mp4') }] })).toBe(true);
+		expect(usesAssets({ ...older, videos: [{ ...video, poster: asset('a.jpg') }] })).toBe(true);
+	});
+});
+
 describe('loaders', () => {
 	it('observe their KV reads as the posts datastore', async () => {
 		const { kv } = postsKv();
@@ -149,12 +212,21 @@ describe('renderPost', () => {
 			'width="800" height="600"'
 		);
 	});
+
+	it('re-renders when only the videos change', async () => {
+		const url = 'https://assets.crafts.software/2026/11/a.mp4';
+		const post = { ...older, slug: 'with-video', markdown: `![A clip](${url})\n` };
+		expect(await renderPost(post)).toBe(`<p><img src="${url}" alt="A clip"></p>`);
+		const videos = [{ url, poster: 'https://assets.crafts.software/2026/11/a.jpg', width: 1280, height: 720 }];
+		expect(await renderPost({ ...post, videos })).toContain('<video controls playsinline preload="metadata"');
+	});
 });
 
 describe('summaryOf', () => {
-	it('leaves out the markdown and the images', () => {
+	it('leaves out the markdown, the images and the videos', () => {
 		const images = [{ url: 'https://assets.crafts.software/2026/11/a.jpg', width: 800, height: 600 }];
-		expect(summaryOf({ ...older, images })).toEqual({
+		const videos = [{ url: 'https://assets.crafts.software/2026/11/a.mp4', poster: images[0].url, width: 800, height: 600 }];
+		expect(summaryOf({ ...older, images, videos })).toEqual({
 			slug: older.slug,
 			title: older.title,
 			date: older.date,

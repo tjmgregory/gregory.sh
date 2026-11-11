@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { ASSETS_ORIGIN, loadPostPage, POSTS_CACHE_CONTROL, renderPost, summaryOf } from '$lib/server/posts';
+import { loadPostPage, POSTS_CACHE_CONTROL, renderPost, summaryOf, usesAssets } from '$lib/server/posts';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, platform, setHeaders }) => {
@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ params, platform, setHeaders }) => 
 	return {
 		post: summaryOf(post),
 		html: await renderPost(post),
-		usesAssets: post.images?.some((image) => image.url.startsWith(ASSETS_ORIGIN)) ?? false,
+		usesAssets: usesAssets(post),
 		morePosts: posts.filter((other) => other.slug !== post.slug).slice(0, 2)
 	};
 };

@@ -24,23 +24,41 @@ jobs:
       - name: Build
         run: bun run build
 
-      # The newsroom lists bearer token comes from 1Password, addressed by a
-      # reference committed here. OP_SERVICE_ACCOUNT_TOKEN is the
-      # organisation's one GitHub secret, because it is what reads 1Password.
-      - uses: 1password/load-secrets-action@v5
+      - uses: 1password/install-cli-action@1a3160d5e9de1ae0803eaa08a88746f5ae3daa50 # v4.1.0
         with:
-          export-env: true
+          version: 2.42.0
+
+      - name: Load secrets from 1Password
+        shell: bash
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           NEWSROOM_LISTS_TOKEN: op://TSE Systems/gregory.sh - the-newsroom-lists bearer token/token
-
-      # load-secrets-action exits 0 when `op env ls` recognises no reference,
-      # so an unaddressable title exports nothing and the deploy ships a blank
-      # token instead of failing loudly. Catch that here.
-      - name: Check the newsroom lists token loaded
         run: |
           set -euo pipefail
-          [ -n "${NEWSROOM_LISTS_TOKEN:-}" ] || { echo "::error::NEWSROOM_LISTS_TOKEN did not load from 1Password"; exit 1; }
+          names=()
+          while IFS= read -r -d '' entry; do
+            case "${entry#*=}" in op://*) names+=("${entry%%=*}") ;; esac
+          done < <(env -0)
+          [ "${#names[@]}" -gt 0 ] || { echo "::error::No op:// reference in this step's env"; exit 1; }
+          cat >"${RUNNER_TEMP}/export-secrets.sh" <<'EOF'
+          set -euo pipefail
+          for name in "$@"; do
+            [ -n "${!name:-}" ] || { echo "::error::1Password returned an empty value for ${name}"; exit 1; }
+          done
+          delimiter="ghadelimiter_$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
+          for name in "$@"; do
+            while IFS= read -r line; do
+              line="${line%$'\r'}"
+              case "${line}" in *[![:space:]]*) ;; *) continue ;; esac
+              line="${line//%/%25}"
+              printf '::add-mask::%s\n' "${line//$'\r'/%0D}"
+            done <<<"${!name}"
+          done
+          for name in "$@"; do
+            printf '%s<<%s\n%s\n%s\n' "${name}" "${delimiter}" "${!name}" "${delimiter}"
+          done >>"${GITHUB_ENV}"
+          EOF
+          op run --no-masking --cache=false -- bash "${RUNNER_TEMP}/export-secrets.sh" "${names[@]}"
 
       - name: Create Pages project if needed
         uses: cloudflare/wrangler-action@v3
